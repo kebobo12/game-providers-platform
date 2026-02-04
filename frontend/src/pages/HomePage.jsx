@@ -1,44 +1,52 @@
-import { useState, useEffect } from 'react'
-import { api } from '../api/client'
+import { useState, useEffect, useMemo } from 'react'
+import { StatsCards } from '../components/Stats/StatsCards'
+import { FilterPanel } from '../components/Filters'
+import { ProviderGrid } from '../components/Providers'
+import { useFilters } from '../hooks/useFilters'
+import { useProviders } from '../hooks/useProviders'
 
 export default function HomePage() {
-  const [health, setHealth] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const { filters } = useFilters()
+  const [page, setPage] = useState(1)
 
+  // Stringify filters for stable dependency comparison
+  const filtersKey = useMemo(() => JSON.stringify(filters), [filters])
+
+  // Reset to page 1 when filters change
   useEffect(() => {
-    api.get('/health/')
-      .then(data => {
-        setHealth(data)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error('Failed to fetch health:', err)
-        setLoading(false)
-      })
-  }, [])
+    setPage(1)
+  }, [filtersKey])
+
+  const {
+    providers,
+    totalCount,
+    currentPage,
+    totalPages,
+    isLoading,
+    isFetching,
+  } = useProviders(filters, page)
 
   return (
     <div>
       <h2 className="text-2xl font-bold text-text mb-6">Dashboard</h2>
 
-      <div className="bg-surface border border-border rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-text mb-4">API Status</h3>
-        {loading ? (
-          <p className="text-text-muted">Checking API connection...</p>
-        ) : health ? (
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-success rounded-full"></span>
-            <span className="text-success">
-              Backend connected: {JSON.stringify(health)}
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-error rounded-full"></span>
-            <span className="text-error">Backend not reachable</span>
-          </div>
-        )}
-      </div>
+      {/* Stats Cards */}
+      <StatsCards />
+
+      {/* Filter Panel */}
+      <FilterPanel />
+
+      {/* Provider Grid */}
+      <ProviderGrid
+        providers={providers}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        isLoading={isLoading}
+        isFetching={isFetching}
+        filters={filters}
+      />
     </div>
   )
 }
