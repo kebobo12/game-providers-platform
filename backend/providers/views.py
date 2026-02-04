@@ -5,10 +5,14 @@ Uses DRF ViewSets for CRUD operations.
 """
 import csv
 
+from django.contrib.auth import authenticate, login, logout
 from django.db.models import Count
 from django.http import StreamingHttpResponse
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status, viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import GameFilter, ProviderFilter
@@ -189,3 +193,61 @@ class CountryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
     pagination_class = None
+
+
+# Auth views
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    """Return CSRF token for frontend."""
+    return Response({'csrfToken': get_token(request)})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    """Authenticate user and create session."""
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    if not username or not password:
+        return Response(
+            {'detail': 'Username and password are required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        login(request, user)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+        })
+    else:
+        return Response(
+            {'detail': 'Invalid credentials.'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    """Clear user session."""
+    logout(request)
+    return Response({'detail': 'Logged out successfully.'})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me_view(request):
+    """Return current authenticated user info."""
+    user = request.user
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+    })
