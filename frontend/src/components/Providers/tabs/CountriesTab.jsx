@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExportButton, downloadCSV, arrayToCSV } from '../../shared'
+import { CountryModal } from '../../Modals'
 
 function XCircleIcon() {
   return (
@@ -41,8 +42,11 @@ function CountryBadge({ country, type }) {
   )
 }
 
+const PREVIEW_LIMIT = 20
+
 export function CountriesTab({ provider }) {
   const [activeSubTab, setActiveSubTab] = useState('restricted')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   if (!provider) return null
 
@@ -62,89 +66,134 @@ export function CountriesTab({ provider }) {
   }
 
   const totalCount = restrictions.length
+  const showViewAll = restrictedCountries.length > PREVIEW_LIMIT || regulatedCountries.length > PREVIEW_LIMIT
+
+  // Preview only first N countries
+  const previewRestricted = restrictedCountries.slice(0, PREVIEW_LIMIT)
+  const previewRegulated = regulatedCountries.slice(0, PREVIEW_LIMIT)
 
   return (
-    <div className="space-y-4">
-      {/* Header with count and export */}
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-text-muted">
-          {totalCount} {totalCount === 1 ? 'country' : 'countries'}
-        </span>
-        {totalCount > 0 && (
-          <ExportButton onClick={handleExport} />
-        )}
-      </div>
-
-      {/* Sub-tabs */}
-      <div className="flex gap-2 border-b border-border">
-        <button
-          onClick={() => setActiveSubTab('restricted')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeSubTab === 'restricted'
-              ? 'border-error text-error'
-              : 'border-transparent text-text-muted hover:text-text'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <XCircleIcon />
-            Restricted ({restrictedCountries.length})
+    <>
+      <div className="space-y-4">
+        {/* Header with count and export */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-text-muted">
+            {totalCount} {totalCount === 1 ? 'country' : 'countries'}
           </span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('regulated')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeSubTab === 'regulated'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-text-muted hover:text-text'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <CheckCircleIcon />
-            Regulated ({regulatedCountries.length})
-          </span>
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="min-h-[100px]">
-        {activeSubTab === 'restricted' && (
-          <div className="space-y-3">
-            {restrictedCountries.length === 0 ? (
-              <p className="text-text-muted text-sm py-4 text-center">No restricted countries</p>
-            ) : (
-              <>
-                <div className="flex flex-wrap gap-2">
-                  {restrictedCountries.map(c => (
-                    <CountryBadge key={c.country_code} country={c} type="restricted" />
-                  ))}
-                </div>
-                <p className="text-xs text-text-muted mt-3">
-                  ⚠️ Games cannot be offered in these countries
-                </p>
-              </>
+          <div className="flex items-center gap-2">
+            {showViewAll && (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="text-sm font-medium text-primary hover:text-primary-hover transition-colors"
+              >
+                View All
+              </button>
+            )}
+            {totalCount > 0 && (
+              <ExportButton onClick={handleExport} />
             )}
           </div>
-        )}
+        </div>
 
-        {activeSubTab === 'regulated' && (
-          <div className="space-y-3">
-            {regulatedCountries.length === 0 ? (
-              <p className="text-text-muted text-sm py-4 text-center">No regulated countries</p>
-            ) : (
-              <>
-                <div className="flex flex-wrap gap-2">
-                  {regulatedCountries.map(c => (
-                    <CountryBadge key={c.country_code} country={c} type="regulated" />
-                  ))}
-                </div>
-                <p className="text-xs text-text-muted mt-3">
-                  ℹ️ Games can be offered but must comply with local regulations
-                </p>
-              </>
-            )}
-          </div>
-        )}
+        {/* Sub-tabs */}
+        <div className="flex gap-2 border-b border-border">
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('restricted')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              activeSubTab === 'restricted'
+                ? 'border-error text-error'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <XCircleIcon />
+              Restricted ({restrictedCountries.length})
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('regulated')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              activeSubTab === 'regulated'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <CheckCircleIcon />
+              Regulated ({regulatedCountries.length})
+            </span>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="min-h-[100px]">
+          {activeSubTab === 'restricted' && (
+            <div className="space-y-3">
+              {restrictedCountries.length === 0 ? (
+                <p className="text-text-muted text-sm py-4 text-center">No restricted countries</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {previewRestricted.map(c => (
+                      <CountryBadge key={c.country_code} country={c} type="restricted" />
+                    ))}
+                  </div>
+                  {restrictedCountries.length > PREVIEW_LIMIT && (
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(true)}
+                      className="text-sm text-primary hover:text-primary-hover transition-colors"
+                    >
+                      +{restrictedCountries.length - PREVIEW_LIMIT} more restricted countries
+                    </button>
+                  )}
+                  <p className="text-xs text-text-muted mt-3">
+                    ⚠️ Games cannot be offered in these countries
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
+          {activeSubTab === 'regulated' && (
+            <div className="space-y-3">
+              {regulatedCountries.length === 0 ? (
+                <p className="text-text-muted text-sm py-4 text-center">No regulated countries</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {previewRegulated.map(c => (
+                      <CountryBadge key={c.country_code} country={c} type="regulated" />
+                    ))}
+                  </div>
+                  {regulatedCountries.length > PREVIEW_LIMIT && (
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(true)}
+                      className="text-sm text-primary hover:text-primary-hover transition-colors"
+                    >
+                      +{regulatedCountries.length - PREVIEW_LIMIT} more regulated countries
+                    </button>
+                  )}
+                  <p className="text-xs text-text-muted mt-3">
+                    ℹ️ Games can be offered but must comply with local regulations
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Modal */}
+      <CountryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        provider={provider}
+      />
+    </>
   )
 }

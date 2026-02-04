@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExportButton, downloadCSV, arrayToCSV } from '../../shared'
+import { CurrencyModal } from '../../Modals'
 
 function CoinIcon() {
   return (
@@ -23,8 +24,11 @@ function CurrencyBadge({ code, type }) {
   )
 }
 
+const PREVIEW_LIMIT = 20
+
 export function CurrenciesTab({ provider }) {
   const [activeSubTab, setActiveSubTab] = useState('fiat')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   if (!provider) return null
 
@@ -52,79 +56,128 @@ export function CurrenciesTab({ provider }) {
   }
 
   const totalCount = fiatCurrencies.length + cryptoCurrencies.length
+  const showViewAll = fiatCurrencies.length > PREVIEW_LIMIT || cryptoCurrencies.length > PREVIEW_LIMIT
+
+  // Preview only first N currencies
+  const previewFiat = fiatCurrencies.slice(0, PREVIEW_LIMIT)
+  const previewCrypto = cryptoCurrencies.slice(0, PREVIEW_LIMIT)
 
   return (
-    <div className="space-y-4">
-      {/* Header with count and export */}
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-text-muted">
-          {totalCount} {totalCount === 1 ? 'currency' : 'currencies'}
-        </span>
-        {totalCount > 0 && (
-          <ExportButton onClick={handleExport} />
-        )}
-      </div>
-
-      {/* Sub-tabs */}
-      <div className="flex gap-2 border-b border-border">
-        <button
-          onClick={() => setActiveSubTab('fiat')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeSubTab === 'fiat'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-text-muted hover:text-text'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <CoinIcon />
-            Fiat ({fiatCurrencies.length})
+    <>
+      <div className="space-y-4">
+        {/* Header with count and export */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-text-muted">
+            {totalCount} {totalCount === 1 ? 'currency' : 'currencies'}
           </span>
-        </button>
-        <button
-          onClick={() => setActiveSubTab('crypto')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeSubTab === 'crypto'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-text-muted hover:text-text'
-          }`}
-        >
-          <span className="flex items-center gap-2">
-            <CoinIcon />
-            Crypto ({cryptoCurrencies.length})
-          </span>
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="min-h-[100px]">
-        {activeSubTab === 'fiat' && (
-          <div className="space-y-3">
-            {fiatCurrencies.length === 0 ? (
-              <p className="text-text-muted text-sm py-4 text-center">No fiat currencies</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {fiatCurrencies.map(c => (
-                  <CurrencyBadge key={c.currency_code} code={c.currency_code} type="fiat" />
-                ))}
-              </div>
+          <div className="flex items-center gap-2">
+            {showViewAll && (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="text-sm font-medium text-primary hover:text-primary-hover transition-colors"
+              >
+                View All
+              </button>
+            )}
+            {totalCount > 0 && (
+              <ExportButton onClick={handleExport} />
             )}
           </div>
-        )}
+        </div>
 
-        {activeSubTab === 'crypto' && (
-          <div className="space-y-3">
-            {cryptoCurrencies.length === 0 ? (
-              <p className="text-text-muted text-sm py-4 text-center">No cryptocurrencies</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {cryptoCurrencies.map(c => (
-                  <CurrencyBadge key={c.currency_code} code={c.currency_code} type="crypto" />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Sub-tabs */}
+        <div className="flex gap-2 border-b border-border">
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('fiat')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              activeSubTab === 'fiat'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <CoinIcon />
+              Fiat ({fiatCurrencies.length})
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('crypto')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              activeSubTab === 'crypto'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <CoinIcon />
+              Crypto ({cryptoCurrencies.length})
+            </span>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="min-h-[100px]">
+          {activeSubTab === 'fiat' && (
+            <div className="space-y-3">
+              {fiatCurrencies.length === 0 ? (
+                <p className="text-text-muted text-sm py-4 text-center">No fiat currencies</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {previewFiat.map(c => (
+                      <CurrencyBadge key={c.currency_code} code={c.currency_code} type="fiat" />
+                    ))}
+                  </div>
+                  {fiatCurrencies.length > PREVIEW_LIMIT && (
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(true)}
+                      className="text-sm text-primary hover:text-primary-hover transition-colors"
+                    >
+                      +{fiatCurrencies.length - PREVIEW_LIMIT} more fiat currencies
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {activeSubTab === 'crypto' && (
+            <div className="space-y-3">
+              {cryptoCurrencies.length === 0 ? (
+                <p className="text-text-muted text-sm py-4 text-center">No cryptocurrencies</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {previewCrypto.map(c => (
+                      <CurrencyBadge key={c.currency_code} code={c.currency_code} type="crypto" />
+                    ))}
+                  </div>
+                  {cryptoCurrencies.length > PREVIEW_LIMIT && (
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(true)}
+                      className="text-sm text-primary hover:text-primary-hover transition-colors"
+                    >
+                      +{cryptoCurrencies.length - PREVIEW_LIMIT} more cryptocurrencies
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Modal */}
+      <CurrencyModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        provider={provider}
+      />
+    </>
   )
 }

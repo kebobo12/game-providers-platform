@@ -84,7 +84,11 @@ class Echo:
 
 
 def generate_csv_rows(queryset, fields, headers):
-    """Generator for streaming CSV response."""
+    """Generator for streaming CSV response with Excel compatibility."""
+    # UTF-8 BOM + sep hint for Excel to recognize comma delimiter in all locales
+    yield '\ufeff'
+    yield 'sep=,\r\n'
+
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer)
     yield writer.writerow(headers)
@@ -155,7 +159,7 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
 
         response = StreamingHttpResponse(
             generate_csv_rows(queryset, fields, headers),
-            content_type='text/csv',
+            content_type='text/csv; charset=utf-8',
         )
         response['Content-Disposition'] = 'attachment; filename="providers.csv"'
         return response
@@ -181,7 +185,7 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
 
         response = StreamingHttpResponse(
             generate_csv_rows(filtered_games, fields, headers),
-            content_type='text/csv',
+            content_type='text/csv; charset=utf-8',
         )
         response['Content-Disposition'] = f'attachment; filename="{provider.provider_name}_games.csv"'
         return response
