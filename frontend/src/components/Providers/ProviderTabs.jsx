@@ -79,15 +79,15 @@ export function ProviderTabs({ provider, isLoading }) {
   return (
     <div>
       {/* Tab navigation */}
-      <div className="flex flex-wrap gap-1 border-b border-border px-4">
+      <div className="flex flex-wrap gap-1 px-4 pt-3 pb-2">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => handleTabChange(id)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full transition-colors ${
               activeTab === id
-                ? 'border-primary text-primary'
-                : 'border-transparent text-text-muted hover:text-text'
+                ? 'bg-primary text-white'
+                : 'text-text-muted hover:text-text hover:bg-muted-bg'
             }`}
           >
             <Icon />

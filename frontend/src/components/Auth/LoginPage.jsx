@@ -59,7 +59,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-lg p-6">
+          <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-xl p-6">
             {error && (
               <div className="mb-4 p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
                 {error}
@@ -75,7 +75,7 @@ export default function LoginPage() {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-text placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-3 py-2 bg-surface border border-input-border rounded-lg text-text placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                 placeholder="Enter your username"
                 autoComplete="username"
                 disabled={loading}
@@ -91,7 +91,7 @@ export default function LoginPage() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-text placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-3 py-2 bg-surface border border-input-border rounded-lg text-text placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 disabled={loading}

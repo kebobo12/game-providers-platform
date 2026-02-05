@@ -37,7 +37,7 @@ export function convertGoogleDriveUrl(rawUrl) {
 
 const PREVIEW_BG_MAP = {
   dark: 'var(--color-bg)',
-  light: '#f8f9fa',
+  light: '#F8FAFC',
 }
 
 export function LogoPreview({ url, onChange, fieldId, onDragStart, onDrop: onDropProp, previewBg }) {
@@ -124,7 +124,7 @@ export function LogoPreview({ url, onChange, fieldId, onDragStart, onDrop: onDro
           onPaste={handlePaste}
           onBlur={handleBlur}
           placeholder="https://example.com/logo.png"
-          className="flex-1 px-3 py-2 bg-bg border border-border rounded-lg text-text placeholder-text-muted
+          className="flex-1 px-3 py-2 bg-surface border border-input-border rounded-lg text-text placeholder-text-muted
                      focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
         />
         {url && (

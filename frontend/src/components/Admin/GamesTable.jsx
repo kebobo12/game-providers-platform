@@ -187,7 +187,7 @@ export function GamesTable({ providerId, providerName }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search games..."
-            className="w-full pl-9 pr-3 py-2 bg-bg border border-border rounded-lg text-sm text-text placeholder-text-muted
+            className="w-full pl-9 pr-3 py-2 bg-surface border border-input-border rounded-lg text-sm text-text placeholder-text-muted
                        focus:outline-none focus:border-primary transition-colors"
           />
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
@@ -230,7 +230,7 @@ export function GamesTable({ providerId, providerName }) {
             </thead>
             <tbody className="divide-y divide-border">
               {games.map((game) => (
-                <tr key={game.id} className="hover:bg-bg/50">
+                <tr key={game.id} className="hover:bg-muted-bg">
                   <td className="py-2 text-text">{game.game_title}</td>
                   <td className="py-2 text-text-muted">{game.game_type || '-'}</td>
                   <td className="py-2 text-text-muted">{game.rtp ? `${game.rtp}%` : '-'}</td>

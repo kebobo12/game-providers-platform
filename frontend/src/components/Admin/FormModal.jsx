@@ -125,7 +125,7 @@ export function TextInput({ value, onChange, placeholder, ...props }) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-text placeholder-text-muted
+      className="w-full px-3 py-2 bg-surface border border-input-border rounded-lg text-text placeholder-text-muted
                  focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
       {...props}
     />
@@ -139,7 +139,7 @@ export function TextArea({ value, onChange, placeholder, rows = 3, ...props }) {
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-text placeholder-text-muted
+      className="w-full px-3 py-2 bg-surface border border-input-border rounded-lg text-text placeholder-text-muted
                  focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
       {...props}
     />
@@ -151,7 +151,7 @@ export function Select({ value, onChange, options, placeholder, ...props }) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-text
+      className="w-full px-3 py-2 bg-surface border border-input-border rounded-lg text-text
                  focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
       {...props}
     >

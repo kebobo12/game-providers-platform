@@ -71,7 +71,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-shrink-0 p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-bg/50 transition-colors"
+            className="flex-shrink-0 p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-muted-bg transition-colors"
             aria-label="Close"
           >
             <XIcon />

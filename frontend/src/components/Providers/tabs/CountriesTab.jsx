@@ -26,13 +26,13 @@ function CountryBadge({ country, type, countryLookup = {} }) {
   const code = country.country_code
   const name = countryLookup[code]
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-sm rounded-full ${
+    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
       type === 'restricted'
         ? 'bg-error/10 text-error'
-        : 'bg-primary/10 text-primary'
+        : 'bg-success/10 text-success'
     }`}>
-      <span className="opacity-60 font-mono text-xs">{code}</span>
-      {name && <span className="font-medium">{name}</span>}
+      <span className="opacity-50 font-mono text-xs">{code}</span>
+      {name && <span>{name}</span>}
     </span>
   )
 }
@@ -91,35 +91,31 @@ export function CountriesTab({ provider }) {
           </div>
         </div>
 
-        {/* Sub-tabs */}
-        <div className="flex gap-2 border-b border-border">
+        {/* Sub-tabs — filled toggle */}
+        <div className="flex border border-border rounded-lg overflow-hidden">
           <button
             type="button"
             onClick={() => setActiveSubTab('restricted')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
               activeSubTab === 'restricted'
-                ? 'border-error text-error'
-                : 'border-transparent text-text-muted hover:text-text'
+                ? 'bg-error text-white'
+                : 'text-text-muted hover:text-text'
             }`}
           >
-            <span className="flex items-center gap-2">
-              <XCircleIcon />
-              Restricted ({restrictedCountries.length})
-            </span>
+            <XCircleIcon />
+            Restricted ({restrictedCountries.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveSubTab('regulated')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
               activeSubTab === 'regulated'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-text-muted hover:text-text'
+                ? 'bg-success text-white'
+                : 'text-text-muted hover:text-text'
             }`}
           >
-            <span className="flex items-center gap-2">
-              <CheckCircleIcon />
-              Regulated ({regulatedCountries.length})
-            </span>
+            <CheckCircleIcon />
+            Regulated ({regulatedCountries.length})
           </button>
         </div>
 
@@ -174,7 +170,7 @@ export function CountriesTab({ provider }) {
                     </button>
                   )}
                   <p className="text-xs text-text-muted mt-3">
-                    ℹ️ Games can be offered but must comply with local regulations
+                    ✓ Provider is licensed in these countries
                   </p>
                 </>
               )}

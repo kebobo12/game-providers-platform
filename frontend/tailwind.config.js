@@ -39,6 +39,12 @@ export default {
         'status-active': 'var(--color-status-active)',
         'status-inactive': 'var(--color-status-inactive)',
 
+        /* Muted background */
+        'muted-bg': 'var(--color-muted-bg)',
+
+        /* Input border */
+        'input-border': 'var(--color-input-border)',
+
         /* Accent */
         'accent-blue': 'var(--color-accent-blue)',
         'accent-green': 'var(--color-accent-green)',

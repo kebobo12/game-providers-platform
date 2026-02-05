@@ -11,23 +11,64 @@ function SearchIcon() {
   )
 }
 
-function CoinIcon() {
+const CURRENCY_SYMBOLS = {
+  USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥', KRW: '₩', INR: '₹',
+  TRY: '₺', THB: '฿', RUB: '₽', ILS: '₪', PHP: '₱', VND: '₫',
+  BTC: '₿', ETH: 'Ξ', USDT: '₮', LTC: 'Ł', ADA: '₳',
+}
+
+const CURRENCY_NAMES = {
+  USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', JPY: 'Japanese Yen',
+  CAD: 'Canadian Dollar', AUD: 'Australian Dollar', CHF: 'Swiss Franc',
+  CNY: 'Chinese Yuan', KRW: 'South Korean Won', INR: 'Indian Rupee',
+  BRL: 'Brazilian Real', MXN: 'Mexican Peso', SEK: 'Swedish Krona',
+  NOK: 'Norwegian Krone', DKK: 'Danish Krone', PLN: 'Polish Zloty',
+  CZK: 'Czech Koruna', HUF: 'Hungarian Forint', TRY: 'Turkish Lira',
+  ZAR: 'South African Rand', SGD: 'Singapore Dollar', HKD: 'Hong Kong Dollar',
+  NZD: 'New Zealand Dollar', THB: 'Thai Baht', RUB: 'Russian Ruble',
+  ILS: 'Israeli Shekel', PHP: 'Philippine Peso', IDR: 'Indonesian Rupiah',
+  MYR: 'Malaysian Ringgit', VND: 'Vietnamese Dong', TWD: 'Taiwan Dollar',
+  RON: 'Romanian Leu', BGN: 'Bulgarian Lev', HRK: 'Croatian Kuna',
+  BTC: 'Bitcoin', ETH: 'Ethereum', USDT: 'Tether', USDC: 'USD Coin',
+  LTC: 'Litecoin', XRP: 'Ripple', DOGE: 'Dogecoin', BNB: 'BNB',
+  SOL: 'Solana', ADA: 'Cardano', DOT: 'Polkadot', TRX: 'TRON',
+  MATIC: 'Polygon', AVAX: 'Avalanche', LINK: 'Chainlink',
+  SHIB: 'Shiba Inu', UNI: 'Uniswap', ATOM: 'Cosmos', XLM: 'Stellar',
+  ALGO: 'Algorand', NEAR: 'NEAR Protocol',
+}
+
+function FiatIcon() {
   return (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="8" />
-      <line x1="12" y1="8" x2="12" y2="16" />
-      <line x1="8" y1="12" x2="16" y2="12" />
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  )
+}
+
+function CryptoIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
     </svg>
   )
 }
 
 function CurrencyBadge({ code, type }) {
+  const symbol = CURRENCY_SYMBOLS[code]
+  const name = CURRENCY_NAMES[code]
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full ${
-      type === 'fiat'
-        ? 'bg-success/10 text-success'
-        : 'bg-warning/10 text-warning'
-    }`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
+        type === 'fiat'
+          ? 'bg-currency-fiat/10 text-currency-fiat'
+          : 'bg-currency-crypto/10 text-currency-crypto'
+      }`}
+      title={name || undefined}
+    >
+      {symbol && <span className="opacity-50 text-xs">{symbol}</span>}
       {code}
     </span>
   )
@@ -40,17 +81,23 @@ export function CurrencyModal({ isOpen, onClose, provider }) {
   const fiatCurrencies = provider?.fiat_currencies ?? []
   const cryptoCurrencies = provider?.crypto_currencies ?? []
 
-  // Filter currencies by search term
+  // Filter currencies by search term (matches code or name)
   const filteredFiat = useMemo(() => {
     if (!searchTerm) return fiatCurrencies
     const term = searchTerm.toLowerCase()
-    return fiatCurrencies.filter(c => c.currency_code.toLowerCase().includes(term))
+    return fiatCurrencies.filter(c =>
+      c.currency_code.toLowerCase().includes(term) ||
+      (CURRENCY_NAMES[c.currency_code] || '').toLowerCase().includes(term)
+    )
   }, [fiatCurrencies, searchTerm])
 
   const filteredCrypto = useMemo(() => {
     if (!searchTerm) return cryptoCurrencies
     const term = searchTerm.toLowerCase()
-    return cryptoCurrencies.filter(c => c.currency_code.toLowerCase().includes(term))
+    return cryptoCurrencies.filter(c =>
+      c.currency_code.toLowerCase().includes(term) ||
+      (CURRENCY_NAMES[c.currency_code] || '').toLowerCase().includes(term)
+    )
   }, [cryptoCurrencies, searchTerm])
 
   const handleExport = () => {
@@ -92,41 +139,37 @@ export function CurrencyModal({ isOpen, onClose, provider }) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search currencies..."
-          className="w-full pl-10 pr-4 py-2 bg-bg border border-border rounded-lg
+          className="w-full pl-10 pr-4 py-2 bg-surface border border-input-border rounded-lg
                      text-text placeholder-text-muted
                      focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-border mb-4">
+      {/* Tabs — filled toggle */}
+      <div className="flex border border-border rounded-lg overflow-hidden mb-4">
         <button
           type="button"
           onClick={() => setActiveTab('fiat')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
             activeTab === 'fiat'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-text-muted hover:text-text'
+              ? 'bg-primary text-white'
+              : 'text-text-muted hover:text-text'
           }`}
         >
-          <span className="flex items-center gap-2">
-            <CoinIcon />
-            Fiat ({fiatCurrencies.length})
-          </span>
+          <FiatIcon />
+          Fiat ({fiatCurrencies.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('crypto')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
             activeTab === 'crypto'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-text-muted hover:text-text'
+              ? 'bg-primary text-white'
+              : 'text-text-muted hover:text-text'
           }`}
         >
-          <span className="flex items-center gap-2">
-            <CoinIcon />
-            Crypto ({cryptoCurrencies.length})
-          </span>
+          <CryptoIcon />
+          Crypto ({cryptoCurrencies.length})
         </button>
       </div>
 

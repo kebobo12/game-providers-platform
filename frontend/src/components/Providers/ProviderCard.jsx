@@ -118,22 +118,20 @@ function ProviderLogo({ provider }) {
   )
 }
 
-export function ProviderCard({ provider }) {
-  const [isExpanded, setIsExpanded] = useState(false)
+export function ProviderCard({ provider, isExpanded, onToggle }) {
   const [hasExpanded, setHasExpanded] = useState(false)
   const [isGamesModalOpen, setIsGamesModalOpen] = useState(false)
+
+  // Track if ever expanded (for lazy rendering during collapse animation)
+  useEffect(() => {
+    if (isExpanded) setHasExpanded(true)
+  }, [isExpanded])
 
   // Only fetch detail when expanded (and not already cached)
   const { provider: providerDetail, isLoading } = useProviderDetail(
     provider.id,
     { enabled: isExpanded }
   )
-
-  const handleToggle = () => {
-    const next = !isExpanded
-    if (next) setHasExpanded(true)
-    setIsExpanded(next)
-  }
 
   const handleGameCountClick = (e) => {
     e.stopPropagation()
@@ -144,16 +142,16 @@ export function ProviderCard({ provider }) {
 
   return (
     <>
-      <div className={`bg-surface border rounded-lg overflow-hidden transition-all duration-200 ${
+      <div className={`bg-surface border rounded-xl overflow-hidden transition-all duration-200 ${
         isExpanded
-          ? 'border-primary col-span-full shadow-lg'
+          ? 'border-border col-span-full'
           : 'border-border hover:border-primary/50 hover:-translate-y-px hover:shadow-md'
       }`}>
         {/* Collapsed header - always visible */}
         <button
           type="button"
-          onClick={handleToggle}
-          className="w-full text-left p-4 flex items-center gap-4 cursor-pointer hover:bg-bg/50 transition-colors"
+          onClick={onToggle}
+          className="w-full text-left p-4 flex items-center gap-4 cursor-pointer hover:bg-muted-bg transition-colors"
         >
           {/* Provider logo/initials */}
           <ProviderLogo provider={provider} />
@@ -214,9 +212,16 @@ export function ProviderCard({ provider }) {
             )}
           </div>
 
-          {/* Expand/collapse icon */}
-          <div className="flex-shrink-0 text-text-muted transition-transform duration-200">
-            {isExpanded ? <ChevronUp /> : <ChevronDown />}
+          {/* Expand/collapse */}
+          <div className="flex-shrink-0 flex items-center gap-1.5 text-text-muted transition-transform duration-200">
+            {isExpanded ? (
+              <>
+                <span className="text-sm font-medium text-primary">Close</span>
+                <ChevronUp />
+              </>
+            ) : (
+              <ChevronDown />
+            )}
           </div>
         </button>
 

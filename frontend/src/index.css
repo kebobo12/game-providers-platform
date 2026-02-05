@@ -3,19 +3,21 @@
 @tailwind utilities;
 
 @layer base {
-  /* Dark theme (default) */
+  /* Dark theme (default) — Figma palette */
   :root {
-    --color-bg: #0e1117;
-    --color-surface: #1a1d24;
-    --color-text: #fafafa;
-    --color-text-muted: #9ca3af;
-    --color-primary: #3b82f6;
-    --color-primary-hover: #2563eb;
-    --color-border: #2d3139;
-    --color-error: #ef4444;
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-info: #3b82f6;
+    --color-bg: #0F172A;
+    --color-surface: #111C2F;
+    --color-text: #F8FAFC;
+    --color-text-muted: #94A3B8;
+    --color-primary: #3B9CFF;
+    --color-primary-hover: #2B8CE8;
+    --color-border: #1E293B;
+    --color-muted-bg: #1E293B;
+    --color-input-border: #334155;
+    --color-error: #EF4444;
+    --color-success: #22C55E;
+    --color-warning: #F59E0B;
+    --color-info: #3B9CFF;
 
     /* Game type pills */
     --color-pill-slots: #60a5fa;
@@ -34,32 +36,34 @@
     --color-currency-custom: #fb923c;
 
     /* Status */
-    --color-status-active: #22c55e;
+    --color-status-active: #22C55E;
     --color-status-inactive: #6b7280;
 
-    /* Accent (stat cards) */
-    --color-accent-blue: #3b82f6;
-    --color-accent-green: #22c55e;
+    /* Accent */
+    --color-accent-blue: #3B9CFF;
+    --color-accent-green: #22C55E;
 
     /* Backdrop */
     --color-backdrop: rgba(0, 0, 0, 0.6);
   }
 
-  /* Light theme */
+  /* Light theme — Figma palette */
   :root[data-theme="light"] {
-    --color-bg: #ffffff;
-    --color-surface: #f8f9fa;
-    --color-text: #1a1a1a;
-    --color-text-muted: #6b7280;
-    --color-primary: #2563eb;
-    --color-primary-hover: #1d4ed8;
-    --color-border: #e2e8f0;
-    --color-error: #dc2626;
-    --color-success: #16a34a;
-    --color-warning: #d97706;
-    --color-info: #2563eb;
+    --color-bg: #F8FAFC;
+    --color-surface: #FFFFFF;
+    --color-text: #0F172A;
+    --color-text-muted: #64748B;
+    --color-primary: #3B9CFF;
+    --color-primary-hover: #2B8CE8;
+    --color-border: #E2E8F0;
+    --color-muted-bg: #F1F5F9;
+    --color-input-border: #CBD5E1;
+    --color-error: #EF4444;
+    --color-success: #22C55E;
+    --color-warning: #D97706;
+    --color-info: #3B9CFF;
 
-    /* Game type pills */
+    /* Game type pills — darker variants for light-bg readability */
     --color-pill-slots: #2563eb;
     --color-pill-crash: #dc2626;
     --color-pill-table: #16a34a;
@@ -69,7 +73,7 @@
     --color-pill-poker: #0d9488;
     --color-pill-default: #4b5563;
 
-    /* Currency mode */
+    /* Currency mode — darker variants for light-bg readability */
     --color-currency-fiat: #16a34a;
     --color-currency-crypto: #9333ea;
     --color-currency-both: #2563eb;
@@ -79,9 +83,9 @@
     --color-status-active: #16a34a;
     --color-status-inactive: #4b5563;
 
-    /* Accent (stat cards) */
-    --color-accent-blue: #2563eb;
-    --color-accent-green: #16a34a;
+    /* Accent */
+    --color-accent-blue: #3B9CFF;
+    --color-accent-green: #22C55E;
 
     /* Backdrop */
     --color-backdrop: rgba(0, 0, 0, 0.5);

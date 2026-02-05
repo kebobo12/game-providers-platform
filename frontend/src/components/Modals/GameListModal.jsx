@@ -197,7 +197,7 @@ export function GameListModal({ isOpen, onClose, provider }) {
               value={searchTerm}
               onChange={handleSearchChange}
               placeholder="Search games..."
-              className="w-full pl-10 pr-4 py-2 bg-bg border border-border rounded-lg
+              className="w-full pl-10 pr-4 py-2 bg-surface border border-input-border rounded-lg
                          text-text placeholder-text-muted
                          focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
@@ -206,7 +206,7 @@ export function GameListModal({ isOpen, onClose, provider }) {
           <select
             value={volatilityFilter}
             onChange={handleVolatilityChange}
-            className="px-3 py-2 bg-bg border border-border rounded-lg text-text
+            className="px-3 py-2 bg-surface border border-input-border rounded-lg text-text
                        focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           >
             {VOLATILITY_OPTIONS.map(opt => (

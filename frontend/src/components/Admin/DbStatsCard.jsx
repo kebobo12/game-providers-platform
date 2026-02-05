@@ -64,7 +64,7 @@ export function DbStatsCard() {
         <button
           onClick={fetchStats}
           disabled={isLoading}
-          className="p-2 text-text-muted hover:text-text hover:bg-bg rounded-lg transition-colors disabled:opacity-50"
+          className="p-2 text-text-muted hover:text-text hover:bg-muted-bg rounded-lg transition-colors disabled:opacity-50"
           title="Refresh stats"
         >
           <RefreshIcon />

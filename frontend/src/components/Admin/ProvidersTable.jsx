@@ -176,7 +176,7 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search providers..."
-            className="w-full pl-9 pr-3 py-2 bg-bg border border-border rounded-lg text-sm text-text placeholder-text-muted
+            className="w-full pl-9 pr-3 py-2 bg-surface border border-input-border rounded-lg text-sm text-text placeholder-text-muted
                        focus:outline-none focus:border-primary transition-colors"
           />
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
@@ -206,7 +206,7 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
                 key={provider.id}
                 onClick={() => onSelectProvider(provider.id)}
                 className={`flex items-center justify-between p-3 cursor-pointer transition-colors
-                           ${selectedProvider === provider.id ? 'bg-primary/10' : 'hover:bg-bg'}`}
+                           ${selectedProvider === provider.id ? 'bg-primary/10' : 'hover:bg-muted-bg'}`}
               >
                 {(provider.logo_url_dark || provider.logo_url_light) && (
                   <img

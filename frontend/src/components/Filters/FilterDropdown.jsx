@@ -151,7 +151,7 @@ export function FilterDropdown({
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         disabled={isLoading}
-        className="w-full flex items-center gap-2 px-3 h-10 bg-bg border border-border rounded-lg hover:border-primary transition-colors min-w-[140px] text-left disabled:opacity-50"
+        className="w-full flex items-center gap-2 px-3 h-10 bg-surface border border-input-border rounded-lg hover:border-primary transition-colors min-w-[140px] text-left disabled:opacity-50"
       >
         {!hideLabel && (
           <span className="text-xs text-text-muted uppercase tracking-wide shrink-0">{label}</span>
@@ -185,7 +185,7 @@ export function FilterDropdown({
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder={`Search ${label.toLowerCase()}...`}
-                  className="w-full pl-8 pr-3 py-1.5 bg-bg border border-border rounded text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-primary"
+                  className="w-full pl-8 pr-3 py-1.5 bg-surface border border-input-border rounded text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -210,7 +210,7 @@ export function FilterDropdown({
                     onClick={() => handleSelect(optValue)}
                     className={`
                       w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors
-                      ${isFocused ? 'bg-primary/10' : 'hover:bg-bg'}
+                      ${isFocused ? 'bg-primary/10' : 'hover:bg-muted-bg'}
                       ${isSelected ? 'text-primary' : 'text-text'}
                     `}
                   >

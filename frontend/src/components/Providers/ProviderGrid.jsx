@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ProviderCard } from './ProviderCard'
 import { Pagination, EmptyState } from '../shared'
 
@@ -42,6 +43,8 @@ export function ProviderGrid({
   filters,
   onClearFilters,
 }) {
+  const [expandedId, setExpandedId] = useState(null)
+
   const handleExport = () => {
     // Build query params from filters
     const params = new URLSearchParams()
@@ -105,7 +108,12 @@ export function ProviderGrid({
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {providers.map(provider => (
-            <ProviderCard key={provider.id} provider={provider} />
+            <ProviderCard
+              key={provider.id}
+              provider={provider}
+              isExpanded={expandedId === provider.id}
+              onToggle={() => setExpandedId(prev => prev === provider.id ? null : provider.id)}
+            />
           ))}
         </div>
       )}

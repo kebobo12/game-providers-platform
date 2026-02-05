@@ -34,12 +34,12 @@ function CountryBadge({ country, type, countryLookup = {} }) {
   const code = country.country_code
   const name = countryLookup[code]
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full ${
+    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
       type === 'restricted'
         ? 'bg-error/10 text-error'
-        : 'bg-primary/10 text-primary'
+        : 'bg-success/10 text-success'
     }`}>
-      <span className="opacity-60 font-mono text-xs">{code}</span>
+      <span className="opacity-50 font-mono text-xs">{code}</span>
       {name && <span>{name}</span>}
     </span>
   )
@@ -105,41 +105,37 @@ export function CountryModal({ isOpen, onClose, provider, countryLookup = {} }) 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search countries..."
-          className="w-full pl-10 pr-4 py-2 bg-bg border border-border rounded-lg
+          className="w-full pl-10 pr-4 py-2 bg-surface border border-input-border rounded-lg
                      text-text placeholder-text-muted
                      focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-border mb-4">
+      {/* Tabs — filled toggle */}
+      <div className="flex border border-border rounded-lg overflow-hidden mb-4">
         <button
           type="button"
           onClick={() => setActiveTab('restricted')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
             activeTab === 'restricted'
-              ? 'border-error text-error'
-              : 'border-transparent text-text-muted hover:text-text'
+              ? 'bg-error text-white'
+              : 'text-text-muted hover:text-text'
           }`}
         >
-          <span className="flex items-center gap-2">
-            <XCircleIcon />
-            Restricted ({restrictedCountries.length})
-          </span>
+          <XCircleIcon />
+          Restricted ({restrictedCountries.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('regulated')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
             activeTab === 'regulated'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-text-muted hover:text-text'
+              ? 'bg-success text-white'
+              : 'text-text-muted hover:text-text'
           }`}
         >
-          <span className="flex items-center gap-2">
-            <CheckCircleIcon />
-            Regulated ({regulatedCountries.length})
-          </span>
+          <CheckCircleIcon />
+          Regulated ({regulatedCountries.length})
         </button>
       </div>
 
@@ -180,7 +176,7 @@ export function CountryModal({ isOpen, onClose, provider, countryLookup = {} }) 
                   ))}
                 </div>
                 <p className="text-xs text-text-muted">
-                  ℹ️ Games can be offered but must comply with local regulations
+                  ✓ Provider is licensed in these countries
                 </p>
               </>
             )}
