@@ -47,9 +47,9 @@ export function Modal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Backdrop with blur */}
       <div
-        className="absolute inset-0 bg-black/60 animate-fadeIn"
+        className="absolute inset-0 bg-[--color-backdrop] backdrop-blur-sm animate-fadeIn"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -61,7 +61,7 @@ export function Modal({
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-4 border-b border-border">
+        <div className="flex items-start justify-between p-6 border-b border-border">
           <div className="flex-1 min-w-0 pr-4">
             <h3 className="text-lg font-semibold text-text truncate">{title}</h3>
             {subtitle && (
@@ -79,13 +79,13 @@ export function Modal({
         </div>
 
         {/* Body - scrollable */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-6">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-4 border-t border-border">
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
             {footer}
           </div>
         )}

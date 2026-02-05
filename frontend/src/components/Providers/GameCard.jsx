@@ -10,6 +10,18 @@ function GamepadIcon() {
   )
 }
 
+function getGameTypePillClass(type) {
+  const t = type.toLowerCase()
+  if (t.includes('slot')) return 'bg-pill-slots/15 text-pill-slots'
+  if (t.includes('crash')) return 'bg-pill-crash/15 text-pill-crash'
+  if (t.includes('table')) return 'bg-pill-table/15 text-pill-table'
+  if (t.includes('live')) return 'bg-pill-live/15 text-pill-live'
+  if (t.includes('bingo')) return 'bg-pill-bingo/15 text-pill-bingo'
+  if (t.includes('lottery') || t.includes('keno')) return 'bg-pill-lottery/15 text-pill-lottery'
+  if (t.includes('poker')) return 'bg-pill-poker/15 text-pill-poker'
+  return 'bg-pill-default/15 text-pill-default'
+}
+
 function getVolatilityColor(volatility) {
   switch (volatility?.toLowerCase()) {
     case 'low':
@@ -47,7 +59,7 @@ export function GameCard({ game }) {
           <h4 className="font-semibold text-text truncate">{game.game_title}</h4>
           <div className="flex flex-wrap items-center gap-2 mt-1">
             {game.game_type && (
-              <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded">
+              <span className={`text-xs px-2 py-0.5 rounded ${getGameTypePillClass(game.game_type)}`}>
                 {game.game_type}
               </span>
             )}

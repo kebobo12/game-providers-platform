@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProviderDetail } from '../../hooks/useProviderDetail'
+import { useTheme } from '../../hooks/useTheme'
 import { ProviderTabs } from './ProviderTabs'
 import { GameListModal } from '../Modals'
 
@@ -29,17 +30,17 @@ function getInitials(name) {
   return name.substring(0, 2).toUpperCase()
 }
 
-// Generate consistent color from string
+// Generate consistent color from string — uses CSS variable pill colors
 function getColorFromString(str) {
   const colors = [
-    'bg-primary/20 text-primary',
-    'bg-success/20 text-success',
-    'bg-warning/20 text-warning',
-    'bg-error/20 text-error',
-    'bg-blue-500/20 text-blue-500',
-    'bg-purple-500/20 text-purple-500',
-    'bg-pink-500/20 text-pink-500',
-    'bg-teal-500/20 text-teal-500',
+    'bg-pill-slots/20 text-pill-slots',
+    'bg-pill-table/20 text-pill-table',
+    'bg-pill-bingo/20 text-pill-bingo',
+    'bg-pill-crash/20 text-pill-crash',
+    'bg-pill-live/20 text-pill-live',
+    'bg-pill-lottery/20 text-pill-lottery',
+    'bg-pill-poker/20 text-pill-poker',
+    'bg-currency-fiat/20 text-currency-fiat',
   ]
   let hash = 0
   for (let i = 0; i < str.length; i++) {
@@ -48,14 +49,78 @@ function getColorFromString(str) {
   return colors[Math.abs(hash) % colors.length]
 }
 
+// Map game type to color-coded pill class
+function getGameTypePillClass(type) {
+  const t = type.toLowerCase()
+  if (t.includes('slot')) return 'bg-pill-slots/15 text-pill-slots'
+  if (t.includes('crash')) return 'bg-pill-crash/15 text-pill-crash'
+  if (t.includes('table')) return 'bg-pill-table/15 text-pill-table'
+  if (t.includes('live')) return 'bg-pill-live/15 text-pill-live'
+  if (t.includes('bingo')) return 'bg-pill-bingo/15 text-pill-bingo'
+  if (t.includes('lottery') || t.includes('keno')) return 'bg-pill-lottery/15 text-pill-lottery'
+  if (t.includes('poker')) return 'bg-pill-poker/15 text-pill-poker'
+  return 'bg-pill-default/15 text-pill-default'
+}
+
+// Map currency mode to color-coded badge class
+function getCurrencyModeClass(mode) {
+  switch (mode) {
+    case 'ALL_FIAT': return 'bg-currency-fiat/15 text-currency-fiat border-currency-fiat/30'
+    case 'ALL_CRYPTO': return 'bg-currency-crypto/15 text-currency-crypto border-currency-crypto/30'
+    case 'BOTH': return 'bg-currency-both/15 text-currency-both border-currency-both/30'
+    case 'LIST': return 'bg-currency-custom/15 text-currency-custom border-currency-custom/30'
+    default: return 'bg-text-muted/10 text-text-muted border-border'
+  }
+}
+
 const currencyModeLabels = {
   'ALL_FIAT': 'All Fiat',
   'LIST': 'Custom List',
   'ALL_CRYPTO': 'All Crypto',
 }
 
+function getProviderLogoUrl(provider, isDark) {
+  const dark = provider.logo_url_dark
+  const light = provider.logo_url_light
+  if (isDark) return dark || light || null
+  return light || dark || null
+}
+
+function ProviderLogo({ provider }) {
+  const [imgFailed, setImgFailed] = useState(false)
+  const { isDark } = useTheme()
+  const initials = getInitials(provider.provider_name)
+  const colorClass = getColorFromString(provider.provider_name)
+  const logoUrl = getProviderLogoUrl(provider, isDark)
+
+  // Reset error state when URL changes (e.g., theme toggle)
+  useEffect(() => {
+    setImgFailed(false)
+  }, [logoUrl])
+
+  if (logoUrl && !imgFailed) {
+    return (
+      <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden">
+        <img
+          src={logoUrl}
+          alt={provider.provider_name}
+          className="w-full h-full object-contain"
+          onError={() => setImgFailed(true)}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className={`flex-shrink-0 w-12 h-12 rounded-lg border border-border flex items-center justify-center font-bold text-lg ${colorClass}`}>
+      {initials}
+    </div>
+  )
+}
+
 export function ProviderCard({ provider }) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [hasExpanded, setHasExpanded] = useState(false)
   const [isGamesModalOpen, setIsGamesModalOpen] = useState(false)
 
   // Only fetch detail when expanded (and not already cached)
@@ -64,11 +129,10 @@ export function ProviderCard({ provider }) {
     { enabled: isExpanded }
   )
 
-  const initials = getInitials(provider.provider_name)
-  const colorClass = getColorFromString(provider.provider_name)
-
   const handleToggle = () => {
-    setIsExpanded(!isExpanded)
+    const next = !isExpanded
+    if (next) setHasExpanded(true)
+    setIsExpanded(next)
   }
 
   const handleGameCountClick = (e) => {
@@ -80,8 +144,10 @@ export function ProviderCard({ provider }) {
 
   return (
     <>
-      <div className={`bg-surface border rounded-lg overflow-hidden transition-all ${
-        isExpanded ? 'border-primary col-span-full' : 'border-border hover:border-primary'
+      <div className={`bg-surface border rounded-lg overflow-hidden transition-all duration-200 ${
+        isExpanded
+          ? 'border-primary col-span-full shadow-lg'
+          : 'border-border hover:border-primary/50 hover:-translate-y-px hover:shadow-md'
       }`}>
         {/* Collapsed header - always visible */}
         <button
@@ -90,18 +156,16 @@ export function ProviderCard({ provider }) {
           className="w-full text-left p-4 flex items-center gap-4 cursor-pointer hover:bg-bg/50 transition-colors"
         >
           {/* Provider logo/initials */}
-          <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg ${colorClass}`}>
-            {initials}
-          </div>
+          <ProviderLogo provider={provider} />
 
           {/* Provider info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="font-semibold text-text truncate">{provider.provider_name}</h4>
-              <span className={`flex-shrink-0 px-2 py-0.5 text-xs rounded-full ${
+              <h4 className="font-semibold text-lg text-text truncate">{provider.provider_name}</h4>
+              <span className={`flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${
                 provider.status === 'ACTIVE'
-                  ? 'bg-success/10 text-success'
-                  : 'bg-text-muted/10 text-text-muted'
+                  ? 'bg-status-active/10 text-status-active'
+                  : 'bg-status-inactive/10 text-status-inactive'
               }`}>
                 {provider.status}
               </span>
@@ -126,13 +190,13 @@ export function ProviderCard({ provider }) {
                   {provider.supported_game_types.slice(0, 3).map(type => (
                     <span
                       key={type}
-                      className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded"
+                      className={`text-xs px-2 py-0.5 rounded ${getGameTypePillClass(type)}`}
                     >
                       {type}
                     </span>
                   ))}
                   {provider.supported_game_types.length > 3 && (
-                    <span className="text-xs px-2 py-0.5 bg-text-muted/10 text-text-muted rounded">
+                    <span className="text-xs px-2 py-0.5 bg-pill-default/10 text-pill-default rounded">
                       +{provider.supported_game_types.length - 3}
                     </span>
                   )}
@@ -144,27 +208,31 @@ export function ProviderCard({ provider }) {
           {/* Currency mode badge */}
           <div className="hidden md:flex items-center gap-3">
             {provider.currency_mode && (
-              <span className="text-xs px-2.5 py-1 bg-surface border border-border rounded-full text-text-muted">
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium border ${getCurrencyModeClass(provider.currency_mode)}`}>
                 {currencyModeLabels[provider.currency_mode] || provider.currency_mode}
               </span>
             )}
           </div>
 
           {/* Expand/collapse icon */}
-          <div className="flex-shrink-0 text-text-muted">
+          <div className="flex-shrink-0 text-text-muted transition-transform duration-200">
             {isExpanded ? <ChevronUp /> : <ChevronDown />}
           </div>
         </button>
 
-        {/* Expanded content */}
-        {isExpanded && (
-          <div className="border-t border-border">
-            <ProviderTabs
-              provider={providerDetail || provider}
-              isLoading={isLoading}
-            />
+        {/* Expanded content with smooth open/close animation */}
+        <div className={`expand-grid ${isExpanded ? 'expanded' : ''}`}>
+          <div>
+            {hasExpanded && (
+              <div className="border-t border-border">
+                <ProviderTabs
+                  provider={providerDetail || provider}
+                  isLoading={isLoading}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Games Modal */}

@@ -6,7 +6,7 @@ import { useFilters } from '../hooks/useFilters'
 import { useProviders } from '../hooks/useProviders'
 
 export default function HomePage() {
-  const { filters } = useFilters()
+  const { filters, clearAll, hasActiveFilters } = useFilters()
   const [page, setPage] = useState(1)
 
   // Stringify filters for stable dependency comparison
@@ -28,8 +28,6 @@ export default function HomePage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-text mb-6">Dashboard</h2>
-
       {/* Stats Cards */}
       <StatsCards />
 
@@ -46,6 +44,7 @@ export default function HomePage() {
         isLoading={isLoading}
         isFetching={isFetching}
         filters={filters}
+        onClearFilters={hasActiveFilters ? clearAll : undefined}
       />
     </div>
   )

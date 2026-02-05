@@ -24,10 +24,10 @@ function GamesIcon() {
   )
 }
 
-function StatCard({ icon, label, value, isLoading }) {
+function StatCard({ icon, label, value, isLoading, accentColorClass, iconBgClass }) {
   return (
-    <div className="bg-surface border border-border rounded-lg p-4 flex items-center gap-4">
-      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
+    <div className={`bg-surface border border-border rounded-lg p-4 flex items-center gap-4 border-l-4 ${accentColorClass}`}>
+      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${iconBgClass}`}>
         {icon}
       </div>
       <div>
@@ -54,12 +54,16 @@ export function StatsCards() {
         label="Total Providers"
         value={stats.total_providers}
         isLoading={isLoading}
+        accentColorClass="border-l-accent-blue"
+        iconBgClass="bg-accent-blue/10 text-accent-blue"
       />
       <StatCard
         icon={<GamesIcon />}
         label="Total Games"
         value={stats.total_games}
         isLoading={isLoading}
+        accentColorClass="border-l-accent-green"
+        iconBgClass="bg-accent-green/10 text-accent-green"
       />
     </div>
   )

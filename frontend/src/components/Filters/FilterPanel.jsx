@@ -16,6 +16,7 @@ export function FilterPanel() {
     removeFilter,
     clearAll,
     hasActiveFilters,
+    activeFilterCount,
   } = useFilters()
 
   const {
@@ -38,6 +39,16 @@ export function FilterPanel() {
 
   return (
     <div className="space-y-4 mb-6">
+      {/* Filter header with active count badge */}
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-medium text-text-muted uppercase tracking-wide">Filters</h3>
+        {activeFilterCount > 0 && (
+          <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-primary text-white">
+            {activeFilterCount}
+          </span>
+        )}
+      </div>
+
       {/* Search + Filters Row */}
       <div className="flex flex-col lg:flex-row gap-3">
         <SearchInput

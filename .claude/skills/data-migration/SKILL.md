@@ -9,14 +9,57 @@ description: Creating Django management commands for data import/export, syncing
 
 Location: `backend/providers/management/commands/`
 
-Structure:
+### sync_providers
+
+Syncs providers and games from an external API.
+
+```bash
+docker compose exec backend python manage.py sync_providers
 ```
-backend/providers/management/
-  __init__.py
-  commands/
-    __init__.py
-    your_command.py
+
+What it does:
+- Fetches provider data from external API
+- Uses provider name mapping to normalize API variants to DB names
+- Creates/updates Provider records
+- Syncs associated games
+- Updates `last_synced` timestamp on each provider
+- Can also be triggered via `POST /api/admin/sync/` (superuser only)
+
+### migrate_from_sqlite
+
+Imports data from the legacy SQLite database.
+
+```bash
+docker compose exec backend python manage.py migrate_from_sqlite /path/to/database.sqlite
 ```
+
+What it does:
+- Reads providers, games, currencies, and restrictions from SQLite
+- Maps to current PostgreSQL schema
+- Uses `get_or_create()` to avoid duplicates
+
+### create_default_admin
+
+Creates a default superuser if none exists.
+
+```bash
+docker compose exec backend python manage.py create_default_admin
+```
+
+What it does:
+- Checks if any superuser exists
+- Creates one with default credentials if not
+- Used for initial setup and Docker deployments
+
+## Admin Import Endpoint
+
+File import via `POST /api/admin/import/` (superuser only):
+
+- Accepts `multipart/form-data` with `file` field
+- **CSV format:** semicolon (`;`) delimiter, handles UTF-8 BOM
+- **Excel format:** requires `openpyxl`, looks for column headers: `Provider Name`, `provider_name`, or `name`
+- Returns: `{"imported": N, "skipped": N, "errors": [...]}`
+- Errors are capped at first 10 entries
 
 ## Reference Implementation
 

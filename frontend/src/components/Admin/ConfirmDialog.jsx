@@ -45,12 +45,12 @@ export function ConfirmDialog({
 
   const variantStyles = {
     danger: {
-      icon: 'text-red-400 bg-red-500/10',
-      button: 'bg-red-500 hover:bg-red-600 text-white',
+      icon: 'text-error bg-error/10',
+      button: 'bg-error hover:bg-error/80 text-white',
     },
     warning: {
-      icon: 'text-yellow-400 bg-yellow-500/10',
-      button: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+      icon: 'text-warning bg-warning/10',
+      button: 'bg-warning hover:bg-warning/80 text-white',
     },
     default: {
       icon: 'text-primary bg-primary/10',
@@ -64,7 +64,7 @@ export function ConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 animate-fadeIn"
+        className="absolute inset-0 bg-[--color-backdrop] backdrop-blur-sm animate-fadeIn"
         onClick={onClose}
       />
 

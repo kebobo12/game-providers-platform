@@ -45,7 +45,7 @@ export function ProviderDetail({ providerId, onClose }) {
   if (error) {
     return (
       <div className="bg-surface border border-border rounded-lg p-6">
-        <div className="text-red-400">{error}</div>
+        <div className="text-error">{error}</div>
         <button
           onClick={fetchProvider}
           className="mt-2 text-sm text-primary hover:underline"
@@ -77,8 +77,8 @@ export function ProviderDetail({ providerId, onClose }) {
           <div className="flex items-center gap-3 mt-1 text-sm text-text-muted">
             <span className={`px-2 py-0.5 rounded text-xs font-medium ${
               provider.status === 'ACTIVE'
-                ? 'bg-green-500/10 text-green-400'
-                : 'bg-yellow-500/10 text-yellow-400'
+                ? 'bg-status-active/10 text-status-active'
+                : 'bg-warning/10 text-warning'
             }`}>
               {provider.status}
             </span>

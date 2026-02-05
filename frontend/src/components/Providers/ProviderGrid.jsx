@@ -1,5 +1,5 @@
 import { ProviderCard } from './ProviderCard'
-import { Pagination, ExportButton } from '../shared'
+import { Pagination, EmptyState } from '../shared'
 
 function DownloadIcon() {
   return (
@@ -40,6 +40,7 @@ export function ProviderGrid({
   isLoading,
   isFetching,
   filters,
+  onClearFilters,
 }) {
   const handleExport = () => {
     // Build query params from filters
@@ -73,7 +74,7 @@ export function ProviderGrid({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-text">
           Providers
-          <span className="text-text-muted font-normal ml-2">
+          <span className="text-sm text-text-muted font-normal ml-2">
             ({totalCount} results)
           </span>
         </h3>
@@ -96,9 +97,11 @@ export function ProviderGrid({
 
       {/* Provider cards grid */}
       {providers.length === 0 ? (
-        <div className="text-center py-8 text-text-muted">
-          <p>No providers found matching your filters.</p>
-        </div>
+        <EmptyState
+          message="No providers match your filters"
+          actionLabel={onClearFilters ? 'Clear filters' : undefined}
+          onAction={onClearFilters}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {providers.map(provider => (

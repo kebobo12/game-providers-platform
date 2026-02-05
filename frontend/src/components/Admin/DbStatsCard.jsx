@@ -51,7 +51,7 @@ export function DbStatsCard() {
     <div className="bg-surface border border-border rounded-lg p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+          <div className="p-2 bg-info/10 rounded-lg text-info">
             <DatabaseIcon />
           </div>
           <div>
@@ -72,7 +72,7 @@ export function DbStatsCard() {
       </div>
 
       {error ? (
-        <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400">
+        <div className="mt-4 p-3 bg-error/10 border border-error/30 rounded-lg text-sm text-error">
           {error}
         </div>
       ) : isLoading ? (

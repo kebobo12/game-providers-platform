@@ -258,6 +258,8 @@ def admin_providers(request):
 
         provider = Provider.objects.create(
             provider_name=provider_name,
+            logo_url_dark=data.get('logo_url_dark') or None,
+            logo_url_light=data.get('logo_url_light') or None,
             status=data.get('status', 'DRAFT'),
             currency_mode=data.get('currency_mode', 'ALL_FIAT'),
             notes=data.get('notes', ''),
@@ -300,6 +302,10 @@ def admin_provider_detail(request, pk):
                 )
             provider.provider_name = data['provider_name']
 
+        if 'logo_url_dark' in data:
+            provider.logo_url_dark = data['logo_url_dark'] or None
+        if 'logo_url_light' in data:
+            provider.logo_url_light = data['logo_url_light'] or None
         if 'status' in data:
             provider.status = data['status']
         if 'currency_mode' in data:

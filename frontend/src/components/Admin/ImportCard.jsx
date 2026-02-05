@@ -92,7 +92,7 @@ export function ImportCard() {
   return (
     <div className="bg-surface border border-border rounded-lg p-4">
       <div className="flex items-start gap-3">
-        <div className="p-2 bg-green-500/10 rounded-lg text-green-400">
+        <div className="p-2 bg-success/10 rounded-lg text-success">
           <UploadIcon />
         </div>
         <div className="flex-1 min-w-0">
@@ -135,8 +135,8 @@ export function ImportCard() {
       </div>
 
       {result && (
-        <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm">
-          <div className="font-medium text-green-400">Import Complete</div>
+        <div className="mt-3 p-3 bg-success/10 border border-success/30 rounded-lg text-sm">
+          <div className="font-medium text-success">Import Complete</div>
           <div className="text-text-muted mt-1">
             Imported: {result.imported} | Skipped: {result.skipped}
           </div>
@@ -154,8 +154,8 @@ export function ImportCard() {
       )}
 
       {error && (
-        <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm">
-          <div className="font-medium text-red-400">Import Failed</div>
+        <div className="mt-3 p-3 bg-error/10 border border-error/30 rounded-lg text-sm">
+          <div className="font-medium text-error">Import Failed</div>
           <div className="text-text-muted mt-1">{error}</div>
         </div>
       )}

@@ -15,6 +15,34 @@
     --color-error: #ef4444;
     --color-success: #22c55e;
     --color-warning: #f59e0b;
+    --color-info: #3b82f6;
+
+    /* Game type pills */
+    --color-pill-slots: #60a5fa;
+    --color-pill-crash: #f87171;
+    --color-pill-table: #4ade80;
+    --color-pill-live: #c084fc;
+    --color-pill-bingo: #fb923c;
+    --color-pill-lottery: #f472b6;
+    --color-pill-poker: #2dd4bf;
+    --color-pill-default: #9ca3af;
+
+    /* Currency mode */
+    --color-currency-fiat: #4ade80;
+    --color-currency-crypto: #c084fc;
+    --color-currency-both: #60a5fa;
+    --color-currency-custom: #fb923c;
+
+    /* Status */
+    --color-status-active: #22c55e;
+    --color-status-inactive: #6b7280;
+
+    /* Accent (stat cards) */
+    --color-accent-blue: #3b82f6;
+    --color-accent-green: #22c55e;
+
+    /* Backdrop */
+    --color-backdrop: rgba(0, 0, 0, 0.6);
   }
 
   /* Light theme */
@@ -29,6 +57,34 @@
     --color-error: #dc2626;
     --color-success: #16a34a;
     --color-warning: #d97706;
+    --color-info: #2563eb;
+
+    /* Game type pills */
+    --color-pill-slots: #2563eb;
+    --color-pill-crash: #dc2626;
+    --color-pill-table: #16a34a;
+    --color-pill-live: #9333ea;
+    --color-pill-bingo: #ea580c;
+    --color-pill-lottery: #db2777;
+    --color-pill-poker: #0d9488;
+    --color-pill-default: #4b5563;
+
+    /* Currency mode */
+    --color-currency-fiat: #16a34a;
+    --color-currency-crypto: #9333ea;
+    --color-currency-both: #2563eb;
+    --color-currency-custom: #ea580c;
+
+    /* Status */
+    --color-status-active: #16a34a;
+    --color-status-inactive: #4b5563;
+
+    /* Accent (stat cards) */
+    --color-accent-blue: #2563eb;
+    --color-accent-green: #16a34a;
+
+    /* Backdrop */
+    --color-backdrop: rgba(0, 0, 0, 0.5);
   }
 
   /* Apply theme to body */
@@ -36,5 +92,46 @@
     background-color: var(--color-bg);
     color: var(--color-text);
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Smooth theme transitions on all themed elements */
+  *,
+  *::before,
+  *::after {
+    transition-property: color, background-color, border-color, box-shadow;
+    transition-duration: 0ms;
+  }
+
+  :root[data-theme-transitioning] *,
+  :root[data-theme-transitioning] *::before,
+  :root[data-theme-transitioning] *::after {
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+}
+
+@layer utilities {
+  .bg-checkerboard {
+    background-image: conic-gradient(
+      var(--color-border) 25%, transparent 25%,
+      transparent 50%, var(--color-border) 50%,
+      var(--color-border) 75%, transparent 75%
+    );
+    background-size: 12px 12px;
+  }
+
+  /* Expand/collapse animation using CSS grid */
+  .expand-grid {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease-out;
+  }
+
+  .expand-grid.expanded {
+    grid-template-rows: 1fr;
+  }
+
+  .expand-grid > * {
+    overflow: hidden;
   }
 }

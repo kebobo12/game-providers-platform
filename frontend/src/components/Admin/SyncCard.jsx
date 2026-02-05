@@ -70,8 +70,8 @@ export function SyncCard() {
       </button>
 
       {result && (
-        <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm">
-          <div className="font-medium text-green-400">Sync Complete</div>
+        <div className="mt-3 p-3 bg-success/10 border border-success/30 rounded-lg text-sm">
+          <div className="font-medium text-success">Sync Complete</div>
           <div className="text-text-muted mt-1">
             Providers: {result.providers_processed} | Games: {result.games_synced}
           </div>
@@ -79,8 +79,8 @@ export function SyncCard() {
       )}
 
       {error && (
-        <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm">
-          <div className="font-medium text-red-400">Sync Failed</div>
+        <div className="mt-3 p-3 bg-error/10 border border-error/30 rounded-lg text-sm">
+          <div className="font-medium text-error">Sync Failed</div>
           <div className="text-text-muted mt-1">{error}</div>
         </div>
       )}

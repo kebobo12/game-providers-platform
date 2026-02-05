@@ -56,7 +56,7 @@ export function FormModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 animate-fadeIn"
+        className="absolute inset-0 bg-[--color-backdrop] backdrop-blur-sm animate-fadeIn"
         onClick={onClose}
       />
 
@@ -110,10 +110,10 @@ export function FormField({ label, required, children, error }) {
     <div>
       <label className="block text-sm font-medium text-text mb-1">
         {label}
-        {required && <span className="text-red-400 ml-1">*</span>}
+        {required && <span className="text-error ml-1">*</span>}
       </label>
       {children}
-      {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-1 text-sm text-error">{error}</p>}
     </div>
   )
 }

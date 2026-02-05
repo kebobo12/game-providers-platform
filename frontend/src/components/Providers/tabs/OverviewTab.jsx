@@ -1,3 +1,15 @@
+function getGameTypePillClass(type) {
+  const t = type.toLowerCase()
+  if (t.includes('slot')) return 'bg-pill-slots/15 text-pill-slots'
+  if (t.includes('crash')) return 'bg-pill-crash/15 text-pill-crash'
+  if (t.includes('table')) return 'bg-pill-table/15 text-pill-table'
+  if (t.includes('live')) return 'bg-pill-live/15 text-pill-live'
+  if (t.includes('bingo')) return 'bg-pill-bingo/15 text-pill-bingo'
+  if (t.includes('lottery') || t.includes('keno')) return 'bg-pill-lottery/15 text-pill-lottery'
+  if (t.includes('poker')) return 'bg-pill-poker/15 text-pill-poker'
+  return 'bg-pill-default/15 text-pill-default'
+}
+
 function InfoIcon() {
   return (
     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -54,8 +66,8 @@ export function OverviewTab({ provider }) {
           </div>
           <span className={`inline-block px-2 py-1 text-sm rounded-full ${
             provider.status === 'ACTIVE'
-              ? 'bg-success/10 text-success'
-              : 'bg-text-muted/10 text-text-muted'
+              ? 'bg-status-active/10 text-status-active'
+              : 'bg-status-inactive/10 text-status-inactive'
           }`}>
             {provider.status}
           </span>
@@ -73,7 +85,7 @@ export function OverviewTab({ provider }) {
             {provider.supported_game_types.map(type => (
               <span
                 key={type}
-                className="px-3 py-1 text-sm bg-primary/10 text-primary rounded-full"
+                className={`px-3 py-1 text-sm rounded-full ${getGameTypePillClass(type)}`}
               >
                 {type}
               </span>

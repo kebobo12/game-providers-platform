@@ -17,11 +17,37 @@ export default {
         error: 'var(--color-error)',
         success: 'var(--color-success)',
         warning: 'var(--color-warning)',
+        info: 'var(--color-info)',
+
+        /* Game type pills */
+        'pill-slots': 'var(--color-pill-slots)',
+        'pill-crash': 'var(--color-pill-crash)',
+        'pill-table': 'var(--color-pill-table)',
+        'pill-live': 'var(--color-pill-live)',
+        'pill-bingo': 'var(--color-pill-bingo)',
+        'pill-lottery': 'var(--color-pill-lottery)',
+        'pill-poker': 'var(--color-pill-poker)',
+        'pill-default': 'var(--color-pill-default)',
+
+        /* Currency mode */
+        'currency-fiat': 'var(--color-currency-fiat)',
+        'currency-crypto': 'var(--color-currency-crypto)',
+        'currency-both': 'var(--color-currency-both)',
+        'currency-custom': 'var(--color-currency-custom)',
+
+        /* Status */
+        'status-active': 'var(--color-status-active)',
+        'status-inactive': 'var(--color-status-inactive)',
+
+        /* Accent */
+        'accent-blue': 'var(--color-accent-blue)',
+        'accent-green': 'var(--color-accent-green)',
       },
       animation: {
         fadeIn: 'fadeIn 0.2s ease-out',
         slideUp: 'slideUp 0.2s ease-out',
         fadeOut: 'fadeOut 0.2s ease-out',
+        'spin-once': 'spinOnce 0.4s ease-in-out',
       },
       keyframes: {
         fadeIn: {
@@ -35,6 +61,10 @@ export default {
         fadeOut: {
           '0%': { opacity: '1' },
           '100%': { opacity: '0' },
+        },
+        spinOnce: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         },
       },
     },

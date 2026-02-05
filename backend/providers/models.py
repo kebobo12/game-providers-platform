@@ -44,6 +44,8 @@ class Provider(models.Model):
         choices=CurrencyMode.choices,
         default=CurrencyMode.ALL_FIAT,
     )
+    logo_url_dark = models.URLField(max_length=500, blank=True, null=True)
+    logo_url_light = models.URLField(max_length=500, blank=True, null=True)
     google_sheet_id = models.CharField(max_length=255, blank=True, null=True)
     last_synced = models.DateTimeField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)

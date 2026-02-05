@@ -13,7 +13,65 @@ All filters defined in: [backend/providers/filters.py](../backend/providers/filt
 - Development: `http://localhost:9000/api/`
 - Via frontend proxy: `http://localhost:5173/api/`
 
-## Endpoints
+## Authentication
+
+Session-based authentication with CSRF protection.
+
+### Get CSRF Token
+
+```
+GET /api/auth/csrf/
+```
+
+Returns a CSRF token cookie. Must be called before making POST/PUT/DELETE requests.
+
+### Login
+
+```
+POST /api/auth/login/
+```
+
+Request:
+```json
+{
+  "username": "admin",
+  "password": "password"
+}
+```
+
+Response:
+```json
+{
+  "username": "admin",
+  "is_superuser": true
+}
+```
+
+### Logout
+
+```
+POST /api/auth/logout/
+```
+
+Requires authentication. Clears session.
+
+### Current User
+
+```
+GET /api/auth/me/
+```
+
+Requires authentication.
+
+Response:
+```json
+{
+  "username": "admin",
+  "is_superuser": true
+}
+```
+
+## Public Endpoints
 
 ### Health Check
 
@@ -53,11 +111,11 @@ Returns available values for filter dropdowns.
 Response:
 ```json
 {
-  "game_types": ["Slots", "Roulette", "Blackjack", ...],
+  "game_types": ["Slots", "Roulette", "Blackjack"],
   "currency_modes": ["LIST", "ALL_FIAT"],
-  "fiat_currencies": ["USD", "EUR", "GBP", ...],
-  "crypto_currencies": ["BTC", "ETH", "USDT", ...],
-  "countries": ["US", "GB", "DE", ...]
+  "fiat_currencies": ["USD", "EUR", "GBP"],
+  "crypto_currencies": ["BTC", "ETH", "USDT"],
+  "countries": ["US", "GB", "DE"]
 }
 ```
 
@@ -94,6 +152,8 @@ Response:
     {
       "id": 1,
       "provider_name": "Pragmatic Play",
+      "logo_url_dark": "https://...",
+      "logo_url_light": "https://...",
       "status": "ACTIVE",
       "currency_mode": "ALL_FIAT",
       "game_count": 250,
@@ -116,6 +176,8 @@ Response:
 {
   "id": 1,
   "provider_name": "Pragmatic Play",
+  "logo_url_dark": "https://...",
+  "logo_url_light": "https://...",
   "status": "ACTIVE",
   "currency_mode": "ALL_FIAT",
   "google_sheet_id": null,
@@ -280,6 +342,9 @@ Import providers from CSV or Excel file.
 
 Request: `multipart/form-data` with `file` field
 
+- CSV: semicolon (`;`) delimiter, handles UTF-8 BOM
+- Excel: requires `openpyxl`, looks for "Provider Name"/"provider_name"/"name" column
+
 Response:
 ```json
 {
@@ -312,8 +377,11 @@ Request:
 ```json
 {
   "provider_name": "New Provider",
+  "logo_url_dark": "https://...",
+  "logo_url_light": "https://...",
   "status": "DRAFT",
-  "currency_mode": "ALL_FIAT"
+  "currency_mode": "ALL_FIAT",
+  "notes": ""
 }
 ```
 
@@ -333,8 +401,11 @@ Request:
 ```json
 {
   "provider_name": "Updated Name",
+  "logo_url_dark": "https://...",
+  "logo_url_light": "https://...",
   "status": "ACTIVE",
-  "currency_mode": "LIST"
+  "currency_mode": "LIST",
+  "notes": "Some notes"
 }
 ```
 
@@ -343,6 +414,8 @@ Request:
 ```
 DELETE /api/admin/providers/{id}/
 ```
+
+Deletes provider and all associated games, currencies, and restrictions (CASCADE).
 
 ### Admin Game CRUD
 
@@ -373,6 +446,12 @@ Request:
 }
 ```
 
+#### Get Game
+
+```
+GET /api/admin/games/{id}/
+```
+
 #### Update Game
 
 ```
@@ -396,8 +475,8 @@ GET /api/admin/providers/{id}/currencies/
 Response:
 ```json
 {
-  "fiat": [{"id": 1, "currency_code": "USD"}],
-  "crypto": [{"id": 2, "currency_code": "BTC"}]
+  "fiat": [{"id": 1, "currency_code": "USD", "display": true, "source": "manual"}],
+  "crypto": [{"id": 2, "currency_code": "BTC", "display": true, "source": "manual"}]
 }
 ```
 
@@ -415,11 +494,15 @@ Request:
 }
 ```
 
+Accepts comma-separated string or array of codes.
+
 #### Delete Currency
 
 ```
 DELETE /api/admin/providers/{id}/currencies/{code}/?type=fiat
 ```
+
+Query parameter `type` required: `fiat` or `crypto`.
 
 ### Admin Restriction Management
 
@@ -432,8 +515,8 @@ GET /api/admin/providers/{id}/restrictions/
 Response:
 ```json
 [
-  {"id": 1, "country_code": "US", "restriction_type": "RESTRICTED"},
-  {"id": 2, "country_code": "GB", "restriction_type": "REGULATED"}
+  {"id": 1, "country_code": "US", "restriction_type": "RESTRICTED", "source": "manual"},
+  {"id": 2, "country_code": "GB", "restriction_type": "REGULATED", "source": "manual"}
 ]
 ```
 
@@ -450,6 +533,9 @@ Request:
   "restriction_type": "RESTRICTED"
 }
 ```
+
+Accepts comma-separated string or array of country codes.
+`restriction_type`: `RESTRICTED` or `REGULATED`.
 
 #### Delete Restriction
 
@@ -469,6 +555,6 @@ All errors return:
 HTTP status codes:
 - `400`: Bad request / validation error
 - `401`: Unauthorized
-- `403`: Forbidden
+- `403`: Forbidden (non-superuser accessing admin endpoints)
 - `404`: Not found
 - `500`: Server error

@@ -86,6 +86,8 @@ class ProviderListSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'provider_name',
+            'logo_url_dark',
+            'logo_url_light',
             'status',
             'currency_mode',
             'game_count',
@@ -113,6 +115,8 @@ class ProviderDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'provider_name',
+            'logo_url_dark',
+            'logo_url_light',
             'status',
             'currency_mode',
             'google_sheet_id',

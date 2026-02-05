@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { api } from '../../api/client'
 import { FormModal, FormField, TextInput, Select } from './FormModal'
 import { ConfirmDialog } from './ConfirmDialog'
+import { LogoPreview } from './LogoPreview'
+import { useTheme } from '../../hooks/useTheme'
 
 function SearchIcon() {
   return (
@@ -50,6 +52,7 @@ const CURRENCY_MODE_OPTIONS = [
 ]
 
 export function ProvidersTable({ selectedProvider, onSelectProvider }) {
+  const { isDark } = useTheme()
   const [providers, setProviders] = useState([])
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -60,6 +63,8 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
   const [editingProvider, setEditingProvider] = useState(null)
   const [formData, setFormData] = useState({
     provider_name: '',
+    logo_url_dark: '',
+    logo_url_light: '',
     status: 'DRAFT',
     currency_mode: 'ALL_FIAT',
   })
@@ -92,6 +97,8 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
     setEditingProvider(null)
     setFormData({
       provider_name: '',
+      logo_url_dark: '',
+      logo_url_light: '',
       status: 'DRAFT',
       currency_mode: 'ALL_FIAT',
     })
@@ -103,6 +110,8 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
     setEditingProvider(provider)
     setFormData({
       provider_name: provider.provider_name,
+      logo_url_dark: provider.logo_url_dark || '',
+      logo_url_light: provider.logo_url_light || '',
       status: provider.status,
       currency_mode: provider.currency_mode,
     })
@@ -179,7 +188,7 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
       {/* List */}
       <div className="max-h-[500px] overflow-y-auto">
         {error ? (
-          <div className="p-4 text-sm text-red-400">{error}</div>
+          <div className="p-4 text-sm text-error">{error}</div>
         ) : isLoading ? (
           <div className="p-4 space-y-2">
             {[...Array(5)].map((_, i) => (
@@ -199,6 +208,15 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
                 className={`flex items-center justify-between p-3 cursor-pointer transition-colors
                            ${selectedProvider === provider.id ? 'bg-primary/10' : 'hover:bg-bg'}`}
               >
+                {(provider.logo_url_dark || provider.logo_url_light) && (
+                  <img
+                    src={isDark
+                      ? (provider.logo_url_dark || provider.logo_url_light)
+                      : (provider.logo_url_light || provider.logo_url_dark)}
+                    alt=""
+                    className="w-8 h-8 rounded object-contain flex-shrink-0 bg-checkerboard"
+                  />
+                )}
                 <div className="min-w-0 flex-1">
                   <div className="font-medium text-text truncate">
                     {provider.provider_name}
@@ -220,7 +238,7 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
                       e.stopPropagation()
                       setDeleteTarget(provider)
                     }}
-                    className="p-1.5 text-text-muted hover:text-red-400 hover:bg-surface rounded transition-colors"
+                    className="p-1.5 text-text-muted hover:text-error hover:bg-surface rounded transition-colors"
                     title="Delete"
                   >
                     <TrashIcon />
@@ -239,6 +257,7 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
         onSubmit={handleSubmit}
         title={editingProvider ? 'Edit Provider' : 'Add Provider'}
         isLoading={isSaving}
+        size="lg"
       >
         <FormField label="Provider Name" required>
           <TextInput
@@ -247,6 +266,47 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
             placeholder="e.g., Pragmatic Play"
           />
         </FormField>
+        <FormField label="Logo URL (Dark Theme)">
+          <LogoPreview
+            url={formData.logo_url_dark}
+            onChange={(v) => setFormData({ ...formData, logo_url_dark: v })}
+            fieldId="logo_url_dark"
+            previewBg="dark"
+            onDrop={(src, tgt) => {
+              if ((src === 'logo_url_dark' && tgt === 'logo_url_light') || (src === 'logo_url_light' && tgt === 'logo_url_dark')) {
+                setFormData({ ...formData, logo_url_dark: formData.logo_url_light, logo_url_light: formData.logo_url_dark })
+              }
+            }}
+          />
+        </FormField>
+        <div className="flex items-center justify-center">
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, logo_url_dark: formData.logo_url_light, logo_url_light: formData.logo_url_dark })}
+            className="flex items-center gap-1.5 px-3 py-1 text-xs text-text-muted hover:text-primary bg-bg border border-border rounded-full hover:border-primary transition-colors"
+            title="Swap dark and light logos"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 16V4m0 0L3 8m4-4l4 4" />
+              <path d="M17 8v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
+            Swap
+          </button>
+        </div>
+        <FormField label="Logo URL (Light Theme)">
+          <LogoPreview
+            url={formData.logo_url_light}
+            onChange={(v) => setFormData({ ...formData, logo_url_light: v })}
+            fieldId="logo_url_light"
+            previewBg="light"
+            onDrop={(src, tgt) => {
+              if ((src === 'logo_url_dark' && tgt === 'logo_url_light') || (src === 'logo_url_light' && tgt === 'logo_url_dark')) {
+                setFormData({ ...formData, logo_url_dark: formData.logo_url_light, logo_url_light: formData.logo_url_dark })
+              }
+            }}
+          />
+        </FormField>
+        <p className="text-xs text-text-muted">If only one logo is provided, it will be used for both themes.</p>
         <FormField label="Status">
           <Select
             value={formData.status}

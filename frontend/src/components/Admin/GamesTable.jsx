@@ -205,7 +205,7 @@ export function GamesTable({ providerId, providerName }) {
 
       {/* Table */}
       {error ? (
-        <div className="p-4 text-sm text-red-400">{error}</div>
+        <div className="p-4 text-sm text-error">{error}</div>
       ) : isLoading ? (
         <div className="space-y-2">
           {[...Array(5)].map((_, i) => (
@@ -246,7 +246,7 @@ export function GamesTable({ providerId, providerName }) {
                       </button>
                       <button
                         onClick={() => setDeleteTarget(game)}
-                        className="p-1.5 text-text-muted hover:text-red-400 hover:bg-surface rounded transition-colors"
+                        className="p-1.5 text-text-muted hover:text-error hover:bg-surface rounded transition-colors"
                         title="Delete"
                       >
                         <TrashIcon />

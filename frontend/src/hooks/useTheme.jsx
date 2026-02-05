@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, createContext, useContext } from 'react'
 
 const THEME_KEY = 'gp-theme'
 
@@ -20,7 +20,9 @@ function applyTheme(theme) {
   }
 }
 
-export function useTheme() {
+const ThemeContext = createContext(null)
+
+export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
     // Initialize and apply theme immediately to prevent flicker
     const initial = getInitialTheme()
@@ -43,10 +45,24 @@ export function useTheme() {
     applyTheme(theme)
   }, [])
 
-  return {
+  const value = {
     theme,
     setTheme,
     toggleTheme,
     isDark: theme === 'dark',
   }
+
+  return (
+    <ThemeContext.Provider value={value}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext)
+  if (!context) {
+    throw new Error('useTheme must be used within a ThemeProvider')
+  }
+  return context
 }

@@ -77,7 +77,7 @@ export function CountryManager({ providerId, providerName, onUpdate }) {
 
   if (error) {
     return (
-      <div className="text-red-400">
+      <div className="text-error">
         {error}
         <button onClick={fetchRestrictions} className="ml-2 text-primary hover:underline">
           Retry
@@ -147,12 +147,12 @@ export function CountryManager({ providerId, providerName, onUpdate }) {
             {restrictedCountries.map((r) => (
               <span
                 key={r.id}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 text-red-400 text-sm rounded-full"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-error/10 text-error text-sm rounded-full"
               >
                 {r.country_code}
                 <button
                   onClick={() => handleRemove(r.id)}
-                  className="hover:bg-red-500/20 rounded-full p-0.5 transition-colors"
+                  className="hover:bg-error/20 rounded-full p-0.5 transition-colors"
                   title="Remove"
                 >
                   <CloseIcon />
@@ -175,12 +175,12 @@ export function CountryManager({ providerId, providerName, onUpdate }) {
             {regulatedCountries.map((r) => (
               <span
                 key={r.id}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/10 text-yellow-400 text-sm rounded-full"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-warning/10 text-warning text-sm rounded-full"
               >
                 {r.country_code}
                 <button
                   onClick={() => handleRemove(r.id)}
-                  className="hover:bg-yellow-500/20 rounded-full p-0.5 transition-colors"
+                  className="hover:bg-warning/20 rounded-full p-0.5 transition-colors"
                   title="Remove"
                 >
                   <CloseIcon />

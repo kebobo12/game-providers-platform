@@ -77,7 +77,7 @@ export function CurrencyManager({ providerId, providerName, onUpdate }) {
 
   if (error) {
     return (
-      <div className="text-red-400">
+      <div className="text-error">
         {error}
         <button onClick={fetchCurrencies} className="ml-2 text-primary hover:underline">
           Retry
@@ -144,12 +144,12 @@ export function CurrencyManager({ providerId, providerName, onUpdate }) {
             {currencies.fiat.map((c) => (
               <span
                 key={c.currency_code}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-currency-fiat/10 text-currency-fiat text-sm rounded-full"
               >
                 {c.currency_code}
                 <button
                   onClick={() => handleRemove(c.currency_code, 'fiat')}
-                  className="hover:bg-blue-500/20 rounded-full p-0.5 transition-colors"
+                  className="hover:bg-currency-fiat/20 rounded-full p-0.5 transition-colors"
                   title="Remove"
                 >
                   <CloseIcon />
@@ -172,12 +172,12 @@ export function CurrencyManager({ providerId, providerName, onUpdate }) {
             {currencies.crypto.map((c) => (
               <span
                 key={c.currency_code}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 text-orange-400 text-sm rounded-full"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-currency-crypto/10 text-currency-crypto text-sm rounded-full"
               >
                 {c.currency_code}
                 <button
                   onClick={() => handleRemove(c.currency_code, 'crypto')}
-                  className="hover:bg-orange-500/20 rounded-full p-0.5 transition-colors"
+                  className="hover:bg-currency-crypto/20 rounded-full p-0.5 transition-colors"
                   title="Remove"
                 >
                   <CloseIcon />
