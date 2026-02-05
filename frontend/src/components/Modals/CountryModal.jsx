@@ -34,8 +34,8 @@ function CountryBadge({ country, type, countryLookup = {} }) {
   const code = country.country_code
   const name = countryLookup[code]
   return (
-    <span className={`flex items-center gap-1.5 py-2 px-2 text-sm font-medium rounded-lg ${
-      type === 'restricted' ? 'badge-restricted' : 'badge-regulated'
+    <span className={`flex items-center gap-1.5 py-2 px-2 text-sm font-medium ${
+      type === 'restricted' ? 'color-restricted' : 'color-regulated'
     }`}>
       <span className="opacity-50 font-mono text-xs">{code}</span>
       {name && <span className="truncate">{name}</span>}

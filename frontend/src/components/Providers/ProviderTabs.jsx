@@ -1,15 +1,5 @@
 import { useState } from 'react'
-import { OverviewTab, CurrenciesTab, CountriesTab, GamesTab } from './tabs'
-
-function InfoIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  )
-}
+import { CurrenciesTab, CountriesTab, GamesTab } from './tabs'
 
 function CurrencyIcon() {
   return (
@@ -40,15 +30,23 @@ function GamepadIcon() {
   )
 }
 
+function FolderIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+    </svg>
+  )
+}
+
 const TABS = [
-  { id: 'overview', label: 'Overview', icon: InfoIcon },
   { id: 'currencies', label: 'Currencies', icon: CurrencyIcon },
   { id: 'countries', label: 'Countries', icon: GlobeIcon },
   { id: 'games', label: 'Games', icon: GamepadIcon },
+  { id: 'assets', label: 'Assets', icon: FolderIcon },
 ]
 
 export function ProviderTabs({ provider, isLoading }) {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('currencies')
   // Track if games tab has been visited (for lazy loading)
   const [gamesTabVisited, setGamesTabVisited] = useState(false)
 
@@ -64,7 +62,7 @@ export function ProviderTabs({ provider, isLoading }) {
       <div className="p-4">
         <div className="flex gap-2 mb-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-8 w-24 bg-border rounded-lg animate-pulse" />
+            <div key={i} className="h-8 flex-1 bg-border rounded-lg animate-pulse" />
           ))}
         </div>
         <div className="space-y-3">
@@ -79,33 +77,40 @@ export function ProviderTabs({ provider, isLoading }) {
   return (
     <div>
       {/* Tab navigation */}
-      <div className="flex flex-wrap gap-1 px-4 pt-3 pb-2">
+      <div className="flex px-4 pt-3 pb-2 gap-1">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => handleTabChange(id)}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-sm font-medium rounded-full border transition-colors ${
               activeTab === id
-                ? 'bg-primary text-white'
-                : 'text-text-muted hover:text-text hover:bg-muted-bg'
+                ? 'bg-primary text-white border-primary'
+                : 'text-text-muted border-border hover:text-text hover:bg-muted-bg'
             }`}
           >
             <Icon />
-            {label}
+            <span className="hidden sm:inline">{label}</span>
           </button>
         ))}
       </div>
 
       {/* Tab content */}
       <div className="p-4">
-        {activeTab === 'overview' && <OverviewTab provider={provider} />}
         {activeTab === 'currencies' && <CurrenciesTab provider={provider} />}
         {activeTab === 'countries' && <CountriesTab provider={provider} />}
-        {/* Games tab only renders content if it's been visited (lazy loading) */}
         {activeTab === 'games' && (
           gamesTabVisited ? (
             <GamesTab provider={provider} />
           ) : null
+        )}
+        {activeTab === 'assets' && (
+          <div className="flex flex-col items-center justify-center py-12 text-text-muted">
+            <svg className="w-10 h-10 mb-3 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            <p className="text-sm font-medium">Assets</p>
+            <p className="text-xs mt-1">Coming Soon</p>
+          </div>
         )}
       </div>
     </div>

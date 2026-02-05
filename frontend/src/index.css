@@ -134,6 +134,12 @@
     background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
   }
 
+  /* Text-only color classes for modal grids (no background) */
+  .color-fiat { color: var(--color-success); }
+  .color-crypto { color: var(--color-currency-crypto); }
+  .color-restricted { color: var(--color-error); }
+  .color-regulated { color: var(--color-success); }
+
   .bg-checkerboard {
     background-image: conic-gradient(
       var(--color-border) 25%, transparent 25%,

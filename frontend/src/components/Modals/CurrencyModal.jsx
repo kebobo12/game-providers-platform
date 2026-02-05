@@ -62,8 +62,8 @@ function CurrencyBadge({ code, type }) {
   const name = CURRENCY_NAMES[code]
   return (
     <span
-      className={`flex items-center justify-center gap-1 py-2 text-sm font-medium rounded-lg ${
-        type === 'fiat' ? 'badge-fiat' : 'badge-crypto'
+      className={`flex items-center justify-center gap-1 py-2 text-sm font-medium ${
+        type === 'fiat' ? 'color-fiat' : 'color-crypto'
       }`}
       title={name || undefined}
     >
