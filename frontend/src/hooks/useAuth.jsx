@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, createContext, useContext } from 'react'
-import { api, ApiError } from '../api/client'
+import { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react'
+import { api, ApiError, setOn401Handler, reset401Flag } from '../api/client'
+import { useToast } from './useToast'
 
 const AuthContext = createContext(null)
 
@@ -7,6 +8,18 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { showError } = useToast()
+  const showErrorRef = useRef(showError)
+  showErrorRef.current = showError
+
+  // Register global 401 interceptor
+  useEffect(() => {
+    setOn401Handler(() => {
+      setUser(null)
+      showErrorRef.current('Session expired — please log in again')
+    })
+    return () => setOn401Handler(null)
+  }, [])
 
   // Check session on mount
   useEffect(() => {
@@ -37,6 +50,7 @@ export function AuthProvider({ children }) {
     try {
       const userData = await api.auth.login(username, password)
       setUser(userData)
+      reset401Flag()
       return { success: true }
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Login failed'

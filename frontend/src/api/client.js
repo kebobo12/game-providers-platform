@@ -4,6 +4,18 @@
 
 const API_BASE = '/api'
 
+// 401 interceptor — registered by AuthProvider
+let _on401 = null
+let _on401Fired = false
+
+export function setOn401Handler(handler) {
+  _on401 = handler
+}
+
+export function reset401Flag() {
+  _on401Fired = false
+}
+
 function getCsrfToken() {
   // Get CSRF token from cookie
   const name = 'csrftoken'
@@ -49,6 +61,12 @@ async function request(endpoint, options = {}) {
   }
 
   const response = await fetch(url, config)
+
+  // Global 401 interceptor — skip auth endpoints (they handle 401 themselves)
+  if (response.status === 401 && !endpoint.startsWith('/auth/') && !_on401Fired) {
+    _on401Fired = true
+    if (_on401) _on401()
+  }
 
   // Handle non-JSON responses
   const contentType = response.headers.get('content-type')
