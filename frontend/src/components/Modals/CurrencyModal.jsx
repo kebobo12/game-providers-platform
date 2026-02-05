@@ -58,18 +58,14 @@ export function CurrencyModal({ isOpen, onClose, provider }) {
       ...fiatCurrencies.map(c => ({
         'Currency Code': c.currency_code,
         'Type': 'Fiat',
-        'Display': c.display ? 'Yes' : 'No',
-        'Source': c.source ?? '',
       })),
       ...cryptoCurrencies.map(c => ({
         'Currency Code': c.currency_code,
         'Type': 'Crypto',
-        'Display': c.display ? 'Yes' : 'No',
-        'Source': c.source ?? '',
       })),
     ]
 
-    const csv = arrayToCSV(['Currency Code', 'Type', 'Display', 'Source'], rows)
+    const csv = arrayToCSV(['Currency Code', 'Type'], rows)
     downloadCSV(csv, `${provider?.provider_name}_currencies`)
   }
 

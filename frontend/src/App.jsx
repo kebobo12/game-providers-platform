@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth'
 import { Layout } from './components/Layout'
 import LoginPage from './components/Auth/LoginPage'
 import HomePage from './pages/HomePage'
+import AdminPage from './pages/AdminPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,6 +29,28 @@ function ProtectedRoute({ children }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
+  }
+
+  return children
+}
+
+function SuperuserRoute({ children }) {
+  const { isAuthenticated, isSuperuser, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg">
+        <div className="text-text-muted">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (!isSuperuser) {
+    return <Navigate to="/" replace />
   }
 
   return children
@@ -70,6 +93,16 @@ function AppRoutes() {
               <HomePage />
             </Layout>
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <SuperuserRoute>
+            <Layout>
+              <AdminPage />
+            </Layout>
+          </SuperuserRoute>
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />

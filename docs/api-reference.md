@@ -227,6 +227,236 @@ Response format:
 }
 ```
 
+## Admin Endpoints (Superuser Only)
+
+All admin endpoints require `is_superuser=true`. Returns 403 for non-superusers.
+
+### Admin Stats
+
+```
+GET /api/admin/stats/
+```
+
+Returns detailed database statistics.
+
+Response:
+```json
+{
+  "providers": 133,
+  "games": 14460,
+  "fiat_currencies": 450,
+  "crypto_currencies": 120,
+  "restrictions": 890,
+  "countries": 250,
+  "last_sync": "2024-01-15T10:30:00Z"
+}
+```
+
+### Admin Sync
+
+```
+POST /api/admin/sync/
+```
+
+Trigger provider sync from external API.
+
+Response:
+```json
+{
+  "success": true,
+  "providers_processed": 133,
+  "games_synced": 14460,
+  "output": "..."
+}
+```
+
+### Admin Import
+
+```
+POST /api/admin/import/
+```
+
+Import providers from CSV or Excel file.
+
+Request: `multipart/form-data` with `file` field
+
+Response:
+```json
+{
+  "imported": 10,
+  "skipped": 2,
+  "errors": ["Row 5: Invalid status value"]
+}
+```
+
+### Admin Provider CRUD
+
+#### List Providers
+
+```
+GET /api/admin/providers/
+```
+
+Query Parameters:
+- `search`: Filter by provider name
+
+Response: Array of provider objects
+
+#### Create Provider
+
+```
+POST /api/admin/providers/
+```
+
+Request:
+```json
+{
+  "provider_name": "New Provider",
+  "status": "DRAFT",
+  "currency_mode": "ALL_FIAT"
+}
+```
+
+#### Get Provider
+
+```
+GET /api/admin/providers/{id}/
+```
+
+#### Update Provider
+
+```
+PUT /api/admin/providers/{id}/
+```
+
+Request:
+```json
+{
+  "provider_name": "Updated Name",
+  "status": "ACTIVE",
+  "currency_mode": "LIST"
+}
+```
+
+#### Delete Provider
+
+```
+DELETE /api/admin/providers/{id}/
+```
+
+### Admin Game CRUD
+
+#### List Games
+
+```
+GET /api/admin/games/
+```
+
+Query Parameters:
+- `provider`: Filter by provider ID
+- `search`: Filter by game title
+
+#### Create Game
+
+```
+POST /api/admin/games/
+```
+
+Request:
+```json
+{
+  "provider": 1,
+  "game_title": "New Game",
+  "game_type": "Slots",
+  "rtp": 96.5,
+  "volatility": "high"
+}
+```
+
+#### Update Game
+
+```
+PUT /api/admin/games/{id}/
+```
+
+#### Delete Game
+
+```
+DELETE /api/admin/games/{id}/
+```
+
+### Admin Currency Management
+
+#### List Currencies
+
+```
+GET /api/admin/providers/{id}/currencies/
+```
+
+Response:
+```json
+{
+  "fiat": [{"id": 1, "currency_code": "USD"}],
+  "crypto": [{"id": 2, "currency_code": "BTC"}]
+}
+```
+
+#### Add Currencies
+
+```
+POST /api/admin/providers/{id}/currencies/
+```
+
+Request:
+```json
+{
+  "currency_codes": "USD, EUR, GBP",
+  "type": "fiat"
+}
+```
+
+#### Delete Currency
+
+```
+DELETE /api/admin/providers/{id}/currencies/{code}/?type=fiat
+```
+
+### Admin Restriction Management
+
+#### List Restrictions
+
+```
+GET /api/admin/providers/{id}/restrictions/
+```
+
+Response:
+```json
+[
+  {"id": 1, "country_code": "US", "restriction_type": "RESTRICTED"},
+  {"id": 2, "country_code": "GB", "restriction_type": "REGULATED"}
+]
+```
+
+#### Add Restrictions
+
+```
+POST /api/admin/providers/{id}/restrictions/
+```
+
+Request:
+```json
+{
+  "country_codes": "US, GB, DE",
+  "restriction_type": "RESTRICTED"
+}
+```
+
+#### Delete Restriction
+
+```
+DELETE /api/admin/providers/{id}/restrictions/{restriction_id}/
+```
+
 ## Error Format
 
 All errors return:

@@ -68,6 +68,7 @@ export function AuthProvider({ children }) {
     loading,
     error,
     isAuthenticated: !!user,
+    isSuperuser: !!user?.is_superuser,
     login,
     logout,
     checkSession,

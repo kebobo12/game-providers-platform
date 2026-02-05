@@ -58,10 +58,9 @@ export function CountriesTab({ provider }) {
     const rows = restrictions.map(r => ({
       'Country Code': r.country_code,
       'Restriction Type': r.restriction_type,
-      'Source': r.source ?? '',
     }))
 
-    const csv = arrayToCSV(['Country Code', 'Restriction Type', 'Source'], rows)
+    const csv = arrayToCSV(['Country Code', 'Restriction Type'], rows)
     downloadCSV(csv, `${provider.provider_name}_countries`)
   }
 

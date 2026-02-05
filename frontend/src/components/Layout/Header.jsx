@@ -1,8 +1,10 @@
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { ThemeToggle } from './ThemeToggle'
 
 export function Header() {
-  const { isAuthenticated, logout, loading } = useAuth()
+  const { isAuthenticated, isSuperuser, logout, loading } = useAuth()
+  const location = useLocation()
 
   const handleLogout = async () => {
     await logout()
@@ -37,6 +39,30 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
+          {isAuthenticated && (
+            <Link
+              to="/"
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                location.pathname === '/'
+                  ? 'text-primary bg-primary/10'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              Dashboard
+            </Link>
+          )}
+          {isSuperuser && (
+            <Link
+              to="/admin"
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                location.pathname === '/admin'
+                  ? 'text-primary bg-primary/10'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              Admin
+            </Link>
+          )}
           <ThemeToggle />
           {isAuthenticated && (
             <button

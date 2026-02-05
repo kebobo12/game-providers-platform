@@ -53,7 +53,9 @@ export function ExportButton({
 
 // Utility to download CSV from data
 export function downloadCSV(data, filename) {
-  const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' })
+  // Add UTF-8 BOM for Excel compatibility
+  const BOM = '\uFEFF'
+  const blob = new Blob([BOM + data], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -64,19 +66,19 @@ export function downloadCSV(data, filename) {
   URL.revokeObjectURL(url)
 }
 
-// Convert array of objects to CSV string
+// Convert array of objects to CSV string (semicolon-delimited for Excel)
 export function arrayToCSV(headers, rows) {
-  const headerRow = headers.join(',')
+  const headerRow = headers.join(';')
   const dataRows = rows.map(row =>
     headers.map(h => {
       const value = row[h] ?? ''
-      // Escape quotes and wrap in quotes if contains comma or quote
+      // Escape quotes and wrap in quotes if contains semicolon or quote
       const str = String(value)
-      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      if (str.includes(';') || str.includes('"') || str.includes('\n')) {
         return `"${str.replace(/"/g, '""')}"`
       }
       return str
-    }).join(',')
+    }).join(';')
   )
-  return [headerRow, ...dataRows].join('\n')
+  return [headerRow, ...dataRows].join('\r\n')
 }

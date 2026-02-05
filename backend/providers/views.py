@@ -85,12 +85,12 @@ class Echo:
 
 def generate_csv_rows(queryset, fields, headers):
     """Generator for streaming CSV response with Excel compatibility."""
-    # UTF-8 BOM + sep hint for Excel to recognize comma delimiter in all locales
+    # UTF-8 BOM for Excel to recognize encoding
     yield '\ufeff'
-    yield 'sep=,\r\n'
 
     pseudo_buffer = Echo()
-    writer = csv.writer(pseudo_buffer)
+    # Use semicolon delimiter for better Excel compatibility across locales
+    writer = csv.writer(pseudo_buffer, delimiter=';')
     yield writer.writerow(headers)
 
     for obj in queryset:
@@ -254,4 +254,5 @@ def me_view(request):
         'id': user.id,
         'username': user.username,
         'email': user.email,
+        'is_superuser': user.is_superuser,
     })
