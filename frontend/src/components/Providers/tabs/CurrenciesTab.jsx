@@ -68,7 +68,7 @@ const PREVIEW_LIMIT = 20
 
 export function CurrenciesTab({ provider }) {
   const [activeSubTab, setActiveSubTab] = useState('fiat')
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalTab, setModalTab] = useState(null)
 
   if (!provider) return null
 
@@ -115,7 +115,7 @@ export function CurrenciesTab({ provider }) {
             {showViewAll && (
               <button
                 type="button"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => setModalTab(effectiveTab)}
                 className="text-sm font-medium text-primary hover:text-primary-hover transition-colors"
               >
                 View All
@@ -175,7 +175,7 @@ export function CurrenciesTab({ provider }) {
               {fiatCurrencies.length > PREVIEW_LIMIT && (
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => setModalTab('fiat')}
                   className="text-sm text-primary hover:text-primary-hover transition-colors"
                 >
                   +{fiatCurrencies.length - PREVIEW_LIMIT} more fiat currencies
@@ -194,7 +194,7 @@ export function CurrenciesTab({ provider }) {
               {cryptoCurrencies.length > PREVIEW_LIMIT && (
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => setModalTab('crypto')}
                   className="text-sm text-primary hover:text-primary-hover transition-colors"
                 >
                   +{cryptoCurrencies.length - PREVIEW_LIMIT} more cryptocurrencies
@@ -211,9 +211,10 @@ export function CurrenciesTab({ provider }) {
 
       {/* Modal */}
       <CurrencyModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={!!modalTab}
+        onClose={() => setModalTab(null)}
         provider={provider}
+        initialTab={modalTab}
       />
     </>
   )

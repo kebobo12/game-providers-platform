@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Modal } from './Modal'
 import { ExportButton, downloadCSV, arrayToCSV } from '../shared'
 
@@ -73,9 +73,17 @@ function CurrencyBadge({ code, type }) {
   )
 }
 
-export function CurrencyModal({ isOpen, onClose, provider }) {
+export function CurrencyModal({ isOpen, onClose, provider, initialTab }) {
   const [activeTab, setActiveTab] = useState('fiat')
   const [searchTerm, setSearchTerm] = useState('')
+
+  // Sync to the requested tab when modal opens
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab)
+      setSearchTerm('')
+    }
+  }, [isOpen, initialTab])
 
   const fiatCurrencies = provider?.fiat_currencies ?? []
   const cryptoCurrencies = provider?.crypto_currencies ?? []
