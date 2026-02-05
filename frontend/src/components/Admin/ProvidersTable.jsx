@@ -4,6 +4,7 @@ import { FormModal, FormField, TextInput, Select } from './FormModal'
 import { ConfirmDialog } from './ConfirmDialog'
 import { LogoPreview } from './LogoPreview'
 import { useTheme } from '../../hooks/useTheme'
+import { useToast } from '../../hooks/useToast'
 
 function SearchIcon() {
   return (
@@ -53,6 +54,7 @@ const CURRENCY_MODE_OPTIONS = [
 
 export function ProvidersTable({ selectedProvider, onSelectProvider }) {
   const { isDark } = useTheme()
+  const { showSuccess, showError } = useToast()
   const [providers, setProviders] = useState([])
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -125,13 +127,15 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
     try {
       if (editingProvider) {
         await api.put(`/admin/providers/${editingProvider.id}/`, formData)
+        showSuccess('Provider updated')
       } else {
         await api.post('/admin/providers/', formData)
+        showSuccess('Provider created')
       }
       setIsFormOpen(false)
       fetchProviders()
     } catch (err) {
-      alert(err.message || 'Failed to save provider')
+      showError(err.message || 'Failed to save provider')
     } finally {
       setIsSaving(false)
     }
@@ -148,8 +152,9 @@ export function ProvidersTable({ selectedProvider, onSelectProvider }) {
         onSelectProvider(null)
       }
       fetchProviders()
+      showSuccess('Provider deleted')
     } catch (err) {
-      alert(err.message || 'Failed to delete provider')
+      showError(err.message || 'Failed to delete provider')
     } finally {
       setIsDeleting(false)
     }

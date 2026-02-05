@@ -151,7 +151,7 @@ export function FilterDropdown({
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         disabled={isLoading}
-        className="w-full flex items-center gap-2 px-3 h-10 bg-surface border border-input-border rounded-lg hover:border-primary transition-colors min-w-[140px] text-left disabled:opacity-50"
+        className="w-full flex items-center gap-2 px-3 h-11 bg-surface border border-input-border rounded-lg hover:border-primary transition-colors min-w-[140px] text-left disabled:opacity-50"
       >
         {!hideLabel && (
           <span className="text-xs text-text-muted uppercase tracking-wide shrink-0">{label}</span>

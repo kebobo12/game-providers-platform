@@ -64,7 +64,7 @@ export function ActiveFilters({ filters, onRemove, onClearAll, countryLookup = {
           <button
             type="button"
             onClick={() => onRemove(key, value)}
-            className="hover:bg-primary/20 rounded-full p-0.5 text-primary transition-colors"
+            className="hover:bg-primary/20 rounded-full p-1 text-primary transition-colors"
           >
             <XIcon />
           </button>
@@ -73,7 +73,7 @@ export function ActiveFilters({ filters, onRemove, onClearAll, countryLookup = {
       <button
         type="button"
         onClick={onClearAll}
-        className="text-sm text-text-muted hover:text-error transition-colors"
+        className="text-sm text-text-muted hover:text-error transition-colors min-h-[44px] px-2"
       >
         Clear all
       </button>

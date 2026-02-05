@@ -146,7 +146,7 @@ export function FilterPanel() {
       <button
         type="button"
         onClick={() => setIsExpanded(prev => !prev)}
-        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 text-sm text-text-muted hover:text-text border border-border rounded-lg transition-colors"
+        className="mt-3 w-full flex items-center justify-center gap-2 min-h-[44px] py-2.5 text-sm text-text-muted hover:text-text border border-border rounded-lg transition-colors"
       >
         <span>
           More Filters
@@ -227,7 +227,7 @@ export function FilterPanel() {
               <button
                 type="button"
                 onClick={() => handleCountryModeChange('supported')}
-                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex-1 min-h-[44px] py-2.5 text-sm font-medium transition-colors ${
                   countryMode === 'supported'
                     ? 'bg-primary text-white'
                     : 'text-text-muted hover:text-text'
@@ -238,7 +238,7 @@ export function FilterPanel() {
               <button
                 type="button"
                 onClick={() => handleCountryModeChange('restricted')}
-                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex-1 min-h-[44px] py-2.5 text-sm font-medium transition-colors ${
                   countryMode === 'restricted'
                     ? 'bg-primary text-white'
                     : 'text-text-muted hover:text-text'

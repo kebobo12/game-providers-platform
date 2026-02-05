@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../../api/client'
+import { useToast } from '../../hooks/useToast'
 
 function SyncIcon() {
   return (
@@ -22,6 +23,7 @@ export function SyncCard() {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const { showSuccess, showError: toastError } = useToast()
 
   const handleSync = async () => {
     setIsLoading(true)
@@ -31,8 +33,11 @@ export function SyncCard() {
     try {
       const data = await api.post('/admin/sync/')
       setResult(data)
+      showSuccess(`Sync complete: ${data.providers_processed} providers updated`)
     } catch (err) {
-      setError(err.message || 'Sync failed')
+      const msg = err.message || 'Sync failed'
+      setError(msg)
+      toastError(`Sync failed: ${msg}`)
     } finally {
       setIsLoading(false)
     }

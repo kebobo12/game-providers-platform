@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useToast } from '../../hooks/useToast'
 
 function DownloadIcon() {
   return (
@@ -25,12 +26,16 @@ export function ExportButton({
   className = '',
 }) {
   const [isLoading, setIsLoading] = useState(false)
+  const { showSuccess, showError } = useToast()
 
   const handleClick = async () => {
     if (isLoading) return
     setIsLoading(true)
     try {
       await onClick()
+      showSuccess('CSV downloaded successfully')
+    } catch (err) {
+      showError('Failed to export CSV')
     } finally {
       setIsLoading(false)
     }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ProviderCard } from './ProviderCard'
 import { Pagination, EmptyState } from '../shared'
+import { useToast } from '../../hooks/useToast'
 
 function DownloadIcon() {
   return (
@@ -44,6 +45,7 @@ export function ProviderGrid({
   onClearFilters,
 }) {
   const [expandedId, setExpandedId] = useState(null)
+  const { showSuccess } = useToast()
 
   const handleExport = () => {
     // Build query params from filters
@@ -58,6 +60,7 @@ export function ProviderGrid({
     const queryString = params.toString()
     const url = queryString ? `/api/providers/export/?${queryString}` : '/api/providers/export/'
     window.open(url, '_blank')
+    showSuccess('CSV downloaded successfully')
   }
 
   if (isLoading) {

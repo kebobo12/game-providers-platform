@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { api, ApiError } from '../../api/client'
+import { useToast } from '../../hooks/useToast'
 
 function UploadIcon() {
   return (
@@ -26,6 +27,7 @@ export function ImportCard() {
   const [error, setError] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
+  const { showSuccess, showError } = useToast()
 
   const handleFile = async (file) => {
     if (!file) return
@@ -63,8 +65,11 @@ export function ImportCard() {
       }
 
       setResult(data)
+      showSuccess(`Imported ${data.imported} providers`)
     } catch (err) {
-      setError(err.message || 'Import failed')
+      const msg = err.message || 'Import failed'
+      setError(msg)
+      showError(msg)
     } finally {
       setIsLoading(false)
       if (fileInputRef.current) {
