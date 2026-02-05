@@ -115,6 +115,17 @@
 }
 
 @layer utilities {
+  /* Currency badge colors — Tailwind /opacity modifier doesn't work with CSS variables,
+     so we use color-mix() to get theme-aware tinted backgrounds. */
+  .badge-fiat {
+    color: var(--color-success);
+    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
+  }
+  .badge-crypto {
+    color: var(--color-currency-crypto);
+    background-color: color-mix(in srgb, var(--color-currency-crypto) 10%, transparent);
+  }
+
   .bg-checkerboard {
     background-image: conic-gradient(
       var(--color-border) 25%, transparent 25%,

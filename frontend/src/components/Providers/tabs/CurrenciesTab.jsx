@@ -4,6 +4,7 @@ import { CurrencyModal } from '../../Modals'
 
 const CURRENCY_SYMBOLS = {
   USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥', KRW: '₩', INR: '₹',
+  CAD: 'C$', AUD: 'A$', CHF: 'CHF', BRL: 'R$', MXN: 'Mex$', SEK: 'kr',
   TRY: '₺', THB: '฿', RUB: '₽', ILS: '₪', PHP: '₱', VND: '₫',
   BTC: '₿', ETH: 'Ξ', USDT: '₮', LTC: 'Ł', ADA: '₳',
 }
@@ -53,13 +54,11 @@ function CurrencyBadge({ code, type }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
-        type === 'fiat'
-          ? 'bg-currency-fiat/10 text-currency-fiat'
-          : 'bg-currency-crypto/10 text-currency-crypto'
+        type === 'fiat' ? 'badge-fiat' : 'badge-crypto'
       }`}
       title={name || undefined}
     >
-      {symbol && <span className="opacity-50 text-xs">{symbol}</span>}
+      {symbol && symbol !== code && <span className="opacity-50 font-mono text-xs">{symbol}</span>}
       {code}
     </span>
   )
@@ -75,6 +74,11 @@ export function CurrenciesTab({ provider }) {
 
   const fiatCurrencies = provider.fiat_currencies ?? []
   const cryptoCurrencies = provider.crypto_currencies ?? []
+
+  const hasFiat = fiatCurrencies.length > 0
+  const hasCrypto = cryptoCurrencies.length > 0
+  const hasBoth = hasFiat && hasCrypto
+  const effectiveTab = hasBoth ? activeSubTab : (hasFiat ? 'fiat' : hasCrypto ? 'crypto' : null)
 
   const handleExport = () => {
     const rows = [
@@ -123,84 +127,84 @@ export function CurrenciesTab({ provider }) {
           </div>
         </div>
 
-        {/* Sub-tabs — filled toggle */}
-        <div className="flex border border-border rounded-lg overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('fiat')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-              activeSubTab === 'fiat'
-                ? 'bg-primary text-white'
-                : 'text-text-muted hover:text-text'
-            }`}
-          >
-            <FiatIcon />
-            Fiat ({fiatCurrencies.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('crypto')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-              activeSubTab === 'crypto'
-                ? 'bg-primary text-white'
-                : 'text-text-muted hover:text-text'
-            }`}
-          >
-            <CryptoIcon />
-            Crypto ({cryptoCurrencies.length})
-          </button>
-        </div>
+        {/* Sub-tabs — only show toggle when both types exist */}
+        {hasBoth ? (
+          <div className="flex border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('fiat')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                activeSubTab === 'fiat'
+                  ? 'bg-primary text-white'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              <FiatIcon />
+              Fiat ({fiatCurrencies.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('crypto')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                activeSubTab === 'crypto'
+                  ? 'bg-primary text-white'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              <CryptoIcon />
+              Crypto ({cryptoCurrencies.length})
+            </button>
+          </div>
+        ) : effectiveTab && (
+          <h4 className="text-sm font-medium text-text-muted flex items-center gap-2">
+            {effectiveTab === 'fiat'
+              ? <><FiatIcon /> Supported Fiat Currencies</>
+              : <><CryptoIcon /> Supported Crypto Currencies</>}
+          </h4>
+        )}
 
         {/* Content */}
         <div className="min-h-[100px]">
-          {activeSubTab === 'fiat' && (
+          {effectiveTab === 'fiat' && (
             <div className="space-y-3">
-              {fiatCurrencies.length === 0 ? (
-                <p className="text-text-muted text-sm py-4 text-center">No fiat currencies</p>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {previewFiat.map(c => (
-                      <CurrencyBadge key={c.currency_code} code={c.currency_code} type="fiat" />
-                    ))}
-                  </div>
-                  {fiatCurrencies.length > PREVIEW_LIMIT && (
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="text-sm text-primary hover:text-primary-hover transition-colors"
-                    >
-                      +{fiatCurrencies.length - PREVIEW_LIMIT} more fiat currencies
-                    </button>
-                  )}
-                </>
+              <div className="flex flex-wrap gap-2">
+                {previewFiat.map(c => (
+                  <CurrencyBadge key={c.currency_code} code={c.currency_code} type="fiat" />
+                ))}
+              </div>
+              {fiatCurrencies.length > PREVIEW_LIMIT && (
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="text-sm text-primary hover:text-primary-hover transition-colors"
+                >
+                  +{fiatCurrencies.length - PREVIEW_LIMIT} more fiat currencies
+                </button>
               )}
             </div>
           )}
 
-          {activeSubTab === 'crypto' && (
+          {effectiveTab === 'crypto' && (
             <div className="space-y-3">
-              {cryptoCurrencies.length === 0 ? (
-                <p className="text-text-muted text-sm py-4 text-center">No cryptocurrencies</p>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {previewCrypto.map(c => (
-                      <CurrencyBadge key={c.currency_code} code={c.currency_code} type="crypto" />
-                    ))}
-                  </div>
-                  {cryptoCurrencies.length > PREVIEW_LIMIT && (
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="text-sm text-primary hover:text-primary-hover transition-colors"
-                    >
-                      +{cryptoCurrencies.length - PREVIEW_LIMIT} more cryptocurrencies
-                    </button>
-                  )}
-                </>
+              <div className="flex flex-wrap gap-2">
+                {previewCrypto.map(c => (
+                  <CurrencyBadge key={c.currency_code} code={c.currency_code} type="crypto" />
+                ))}
+              </div>
+              {cryptoCurrencies.length > PREVIEW_LIMIT && (
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="text-sm text-primary hover:text-primary-hover transition-colors"
+                >
+                  +{cryptoCurrencies.length - PREVIEW_LIMIT} more cryptocurrencies
+                </button>
               )}
             </div>
+          )}
+
+          {!effectiveTab && (
+            <p className="text-text-muted text-sm py-4 text-center">No currencies</p>
           )}
         </div>
       </div>

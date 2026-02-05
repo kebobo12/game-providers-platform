@@ -13,6 +13,7 @@ function SearchIcon() {
 
 const CURRENCY_SYMBOLS = {
   USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥', KRW: '₩', INR: '₹',
+  CAD: 'C$', AUD: 'A$', CHF: 'CHF', BRL: 'R$', MXN: 'Mex$', SEK: 'kr',
   TRY: '₺', THB: '฿', RUB: '₽', ILS: '₪', PHP: '₱', VND: '₫',
   BTC: '₿', ETH: 'Ξ', USDT: '₮', LTC: 'Ł', ADA: '₳',
 }
@@ -62,13 +63,11 @@ function CurrencyBadge({ code, type }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
-        type === 'fiat'
-          ? 'bg-currency-fiat/10 text-currency-fiat'
-          : 'bg-currency-crypto/10 text-currency-crypto'
+        type === 'fiat' ? 'badge-fiat' : 'badge-crypto'
       }`}
       title={name || undefined}
     >
-      {symbol && <span className="opacity-50 text-xs">{symbol}</span>}
+      {symbol && symbol !== code && <span className="opacity-50 font-mono text-xs">{symbol}</span>}
       {code}
     </span>
   )
@@ -80,6 +79,11 @@ export function CurrencyModal({ isOpen, onClose, provider }) {
 
   const fiatCurrencies = provider?.fiat_currencies ?? []
   const cryptoCurrencies = provider?.crypto_currencies ?? []
+
+  const hasFiat = fiatCurrencies.length > 0
+  const hasCrypto = cryptoCurrencies.length > 0
+  const hasBoth = hasFiat && hasCrypto
+  const effectiveTab = hasBoth ? activeTab : (hasFiat ? 'fiat' : hasCrypto ? 'crypto' : null)
 
   // Filter currencies by search term (matches code or name)
   const filteredFiat = useMemo(() => {
@@ -145,41 +149,49 @@ export function CurrencyModal({ isOpen, onClose, provider }) {
         />
       </div>
 
-      {/* Tabs — filled toggle */}
-      <div className="flex border border-border rounded-lg overflow-hidden mb-4">
-        <button
-          type="button"
-          onClick={() => setActiveTab('fiat')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === 'fiat'
-              ? 'bg-primary text-white'
-              : 'text-text-muted hover:text-text'
-          }`}
-        >
-          <FiatIcon />
-          Fiat ({fiatCurrencies.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('crypto')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === 'crypto'
-              ? 'bg-primary text-white'
-              : 'text-text-muted hover:text-text'
-          }`}
-        >
-          <CryptoIcon />
-          Crypto ({cryptoCurrencies.length})
-        </button>
-      </div>
+      {/* Tabs — only show toggle when both types exist */}
+      {hasBoth ? (
+        <div className="flex border border-border rounded-lg overflow-hidden mb-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab('fiat')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'fiat'
+                ? 'bg-primary text-white'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <FiatIcon />
+            Fiat ({fiatCurrencies.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('crypto')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'crypto'
+                ? 'bg-primary text-white'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <CryptoIcon />
+            Crypto ({cryptoCurrencies.length})
+          </button>
+        </div>
+      ) : effectiveTab && (
+        <h4 className="text-sm font-medium text-text-muted flex items-center gap-2 mb-4">
+          {effectiveTab === 'fiat'
+            ? <><FiatIcon /> Supported Fiat Currencies</>
+            : <><CryptoIcon /> Supported Crypto Currencies</>}
+        </h4>
+      )}
 
       {/* Content */}
       <div className="min-h-[200px]">
-        {activeTab === 'fiat' && (
+        {effectiveTab === 'fiat' && (
           <div>
             {filteredFiat.length === 0 ? (
               <p className="text-text-muted text-sm py-8 text-center">
-                {searchTerm ? 'No fiat currencies match your search' : 'No fiat currencies'}
+                No fiat currencies match your search
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -191,11 +203,11 @@ export function CurrencyModal({ isOpen, onClose, provider }) {
           </div>
         )}
 
-        {activeTab === 'crypto' && (
+        {effectiveTab === 'crypto' && (
           <div>
             {filteredCrypto.length === 0 ? (
               <p className="text-text-muted text-sm py-8 text-center">
-                {searchTerm ? 'No cryptocurrencies match your search' : 'No cryptocurrencies'}
+                No cryptocurrencies match your search
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
