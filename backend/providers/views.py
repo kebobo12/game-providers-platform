@@ -44,6 +44,26 @@ def stats(request):
     return Response(serializer.data)
 
 
+def _build_country_list() -> list[dict]:
+    """Build country list with codes and names for filter dropdowns."""
+    codes = list(
+        Restriction.objects.values_list('country_code', flat=True)
+        .distinct()
+    )
+    # Build name lookup from Country table (match on iso2 and iso3)
+    name_map = {}
+    name_map.update(
+        dict(Country.objects.filter(iso2__in=codes).values_list('iso2', 'name'))
+    )
+    name_map.update(
+        dict(Country.objects.filter(iso3__in=codes).values_list('iso3', 'name'))
+    )
+    return sorted(
+        [{'code': c, 'name': name_map.get(c, c)} for c in codes],
+        key=lambda x: x['name'],
+    )
+
+
 @api_view(['GET'])
 def filter_options(request):
     """Return available filter options for UI dropdowns."""
@@ -56,21 +76,19 @@ def filter_options(request):
             .order_by('game_type')
         ),
         'currency_modes': [choice[0] for choice in Provider.CurrencyMode.choices],
-        'fiat_currencies': list(
-            FiatCurrency.objects.values_list('currency_code', flat=True)
-            .distinct()
-            .order_by('currency_code')
-        ),
         'crypto_currencies': list(
             CryptoCurrency.objects.values_list('currency_code', flat=True)
             .distinct()
             .order_by('currency_code')
         ),
-        'countries': list(
-            Restriction.objects.values_list('country_code', flat=True)
+        'fiat_currencies': list(
+            FiatCurrency.objects
+            .exclude(currency_code__in=CryptoCurrency.objects.values('currency_code'))
+            .values_list('currency_code', flat=True)
             .distinct()
-            .order_by('country_code')
+            .order_by('currency_code')
         ),
+        'countries': _build_country_list(),
     }
     serializer = FilterOptionsSerializer(data)
     return Response(serializer.data)

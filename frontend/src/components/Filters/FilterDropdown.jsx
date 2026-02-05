@@ -33,6 +33,8 @@ export function FilterDropdown({
   multiple = false,
   placeholder,
   isLoading = false,
+  hideLabel = false,
+  className = '',
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -143,15 +145,17 @@ export function FilterDropdown({
   const showSearch = options.length > 10
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         disabled={isLoading}
-        className="flex items-center gap-2 px-3 py-2 bg-bg border border-border rounded-lg hover:border-primary transition-colors min-w-[140px] text-left disabled:opacity-50"
+        className="w-full flex items-center gap-2 px-3 h-10 bg-bg border border-border rounded-lg hover:border-primary transition-colors min-w-[140px] text-left disabled:opacity-50"
       >
-        <span className="text-xs text-text-muted uppercase tracking-wide shrink-0">{label}</span>
+        {!hideLabel && (
+          <span className="text-xs text-text-muted uppercase tracking-wide shrink-0">{label}</span>
+        )}
         <span className="text-sm text-text truncate flex-1">{displayLabel}</span>
         {selectedCount > 0 && (
           <span className="px-1.5 py-0.5 text-xs bg-primary text-white rounded-full shrink-0">

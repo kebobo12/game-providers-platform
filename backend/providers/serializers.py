@@ -148,7 +148,7 @@ class FilterOptionsSerializer(serializers.Serializer):
     currency_modes = serializers.ListField(child=serializers.CharField())
     fiat_currencies = serializers.ListField(child=serializers.CharField())
     crypto_currencies = serializers.ListField(child=serializers.CharField())
-    countries = serializers.ListField(child=serializers.CharField())
+    countries = serializers.ListField(child=serializers.DictField(child=serializers.CharField()))
 
 
 class CountrySerializer(serializers.ModelSerializer):

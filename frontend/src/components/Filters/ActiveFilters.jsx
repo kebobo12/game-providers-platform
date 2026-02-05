@@ -11,13 +11,15 @@ const FILTER_LABELS = {
   search: 'Search',
   game_type: 'Game Type',
   currency_mode: 'Currency',
-  supported_currency: 'Currency',
+  fiat_currency: 'Fiat',
+  crypto_currency: 'Crypto',
   restricted_country: 'Restricted',
   regulated_country: 'Regulated',
 }
 
-export function ActiveFilters({ filters, onRemove, onClearAll }) {
+export function ActiveFilters({ filters, onRemove, onClearAll, countryLookup = {} }) {
   const activeFilters = []
+  const fmtCountry = (code) => countryLookup[code] ? `${code} - ${countryLookup[code]}` : code
 
   if (filters.search) {
     activeFilters.push({ key: 'search', value: filters.search, label: FILTER_LABELS.search })
@@ -31,16 +33,20 @@ export function ActiveFilters({ filters, onRemove, onClearAll }) {
     activeFilters.push({ key: 'game_type', value, label: FILTER_LABELS.game_type })
   })
 
-  filters.supported_currency.forEach(value => {
-    activeFilters.push({ key: 'supported_currency', value, label: FILTER_LABELS.supported_currency })
+  filters.fiat_currency.forEach(value => {
+    activeFilters.push({ key: 'fiat_currency', value, label: FILTER_LABELS.fiat_currency })
+  })
+
+  filters.crypto_currency.forEach(value => {
+    activeFilters.push({ key: 'crypto_currency', value, label: FILTER_LABELS.crypto_currency })
   })
 
   filters.restricted_country.forEach(value => {
-    activeFilters.push({ key: 'restricted_country', value, label: FILTER_LABELS.restricted_country })
+    activeFilters.push({ key: 'restricted_country', value, label: FILTER_LABELS.restricted_country, display: fmtCountry(value) })
   })
 
   filters.regulated_country.forEach(value => {
-    activeFilters.push({ key: 'regulated_country', value, label: FILTER_LABELS.regulated_country })
+    activeFilters.push({ key: 'regulated_country', value, label: FILTER_LABELS.regulated_country, display: fmtCountry(value) })
   })
 
   if (activeFilters.length === 0) return null
@@ -48,13 +54,13 @@ export function ActiveFilters({ filters, onRemove, onClearAll }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="text-sm text-text-muted">Active filters:</span>
-      {activeFilters.map(({ key, value, label }) => (
+      {activeFilters.map(({ key, value, label, display }) => (
         <span
           key={`${key}-${value}`}
           className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-sm rounded-full"
         >
           <span className="text-text-muted">{label}:</span>
-          <span className="text-primary font-medium truncate max-w-[150px]">{value}</span>
+          <span className="text-primary font-medium truncate max-w-[150px]">{display || value}</span>
           <button
             type="button"
             onClick={() => onRemove(key, value)}

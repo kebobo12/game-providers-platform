@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ExportButton, downloadCSV, arrayToCSV } from '../../shared'
 import { CountryModal } from '../../Modals'
+import { useFilterOptions } from '../../../hooks/useFilterOptions'
 
 function XCircleIcon() {
   return (
@@ -21,23 +22,17 @@ function CheckCircleIcon() {
   )
 }
 
-// Simple ISO2 to emoji flag conversion
-function getFlag(iso2) {
-  if (!iso2 || iso2.length !== 2) return '🏳️'
-  const codePoints = [...iso2.toUpperCase()].map(c => 127397 + c.charCodeAt(0))
-  return String.fromCodePoint(...codePoints)
-}
-
-function CountryBadge({ country, type }) {
-  const iso2 = country.country_code?.substring(0, 2) || country.country_code
+function CountryBadge({ country, type, countryLookup = {} }) {
+  const code = country.country_code
+  const name = countryLookup[code]
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-sm rounded-full ${
       type === 'restricted'
         ? 'bg-error/10 text-error'
         : 'bg-primary/10 text-primary'
     }`}>
-      <span>{getFlag(iso2)}</span>
-      <span className="font-medium">{iso2}</span>
+      <span className="opacity-60 font-mono text-xs">{code}</span>
+      {name && <span className="font-medium">{name}</span>}
     </span>
   )
 }
@@ -47,6 +42,7 @@ const PREVIEW_LIMIT = 20
 export function CountriesTab({ provider }) {
   const [activeSubTab, setActiveSubTab] = useState('restricted')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { countryLookup } = useFilterOptions()
 
   if (!provider) return null
 
@@ -137,7 +133,7 @@ export function CountriesTab({ provider }) {
                 <>
                   <div className="flex flex-wrap gap-2">
                     {previewRestricted.map(c => (
-                      <CountryBadge key={c.country_code} country={c} type="restricted" />
+                      <CountryBadge key={c.country_code} country={c} type="restricted" countryLookup={countryLookup} />
                     ))}
                   </div>
                   {restrictedCountries.length > PREVIEW_LIMIT && (
@@ -165,7 +161,7 @@ export function CountriesTab({ provider }) {
                 <>
                   <div className="flex flex-wrap gap-2">
                     {previewRegulated.map(c => (
-                      <CountryBadge key={c.country_code} country={c} type="regulated" />
+                      <CountryBadge key={c.country_code} country={c} type="regulated" countryLookup={countryLookup} />
                     ))}
                   </div>
                   {regulatedCountries.length > PREVIEW_LIMIT && (
@@ -192,6 +188,7 @@ export function CountriesTab({ provider }) {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         provider={provider}
+        countryLookup={countryLookup}
       />
     </>
   )

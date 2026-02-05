@@ -5,7 +5,8 @@ const INITIAL_FILTERS = {
   search: '',
   game_type: [],
   currency_mode: '',
-  supported_currency: [],
+  fiat_currency: [],
+  crypto_currency: [],
   restricted_country: [],
   regulated_country: [],
 }
@@ -20,7 +21,8 @@ function paramsToFilters(searchParams) {
     search: searchParams.get('search') || '',
     game_type: parseArrayParam(searchParams.get('game_type')),
     currency_mode: searchParams.get('currency_mode') || '',
-    supported_currency: parseArrayParam(searchParams.get('supported_currency')),
+    fiat_currency: parseArrayParam(searchParams.get('fiat_currency')),
+    crypto_currency: parseArrayParam(searchParams.get('crypto_currency')),
     restricted_country: parseArrayParam(searchParams.get('restricted_country')),
     regulated_country: parseArrayParam(searchParams.get('regulated_country')),
   }
@@ -31,7 +33,8 @@ function filtersToParams(filters) {
   if (filters.search) params.set('search', filters.search)
   if (filters.currency_mode) params.set('currency_mode', filters.currency_mode)
   if (filters.game_type.length) params.set('game_type', filters.game_type.join(','))
-  if (filters.supported_currency.length) params.set('supported_currency', filters.supported_currency.join(','))
+  if (filters.fiat_currency.length) params.set('fiat_currency', filters.fiat_currency.join(','))
+  if (filters.crypto_currency.length) params.set('crypto_currency', filters.crypto_currency.join(','))
   if (filters.restricted_country.length) params.set('restricted_country', filters.restricted_country.join(','))
   if (filters.regulated_country.length) params.set('regulated_country', filters.regulated_country.join(','))
   return params
@@ -42,7 +45,8 @@ function filtersEqual(a, b) {
     a.search === b.search &&
     a.currency_mode === b.currency_mode &&
     a.game_type.join(',') === b.game_type.join(',') &&
-    a.supported_currency.join(',') === b.supported_currency.join(',') &&
+    a.fiat_currency.join(',') === b.fiat_currency.join(',') &&
+    a.crypto_currency.join(',') === b.crypto_currency.join(',') &&
     a.restricted_country.join(',') === b.restricted_country.join(',') &&
     a.regulated_country.join(',') === b.regulated_country.join(',')
   )
@@ -120,8 +124,12 @@ export function useFilters() {
     setFilters(prev => ({ ...prev, currency_mode: value || '' }))
   }, [])
 
-  const setSupportedCurrency = useCallback((values) => {
-    setFilters(prev => ({ ...prev, supported_currency: values }))
+  const setFiatCurrency = useCallback((values) => {
+    setFilters(prev => ({ ...prev, fiat_currency: values }))
+  }, [])
+
+  const setCryptoCurrency = useCallback((values) => {
+    setFilters(prev => ({ ...prev, crypto_currency: values }))
   }, [])
 
   const setRestrictedCountry = useCallback((values) => {
@@ -156,7 +164,8 @@ export function useFilters() {
       localSearch !== '' ||
       filters.game_type.length > 0 ||
       filters.currency_mode !== '' ||
-      filters.supported_currency.length > 0 ||
+      filters.fiat_currency.length > 0 ||
+      filters.crypto_currency.length > 0 ||
       filters.restricted_country.length > 0 ||
       filters.regulated_country.length > 0
     )
@@ -167,7 +176,8 @@ export function useFilters() {
     if (localSearch) count++
     if (filters.currency_mode) count++
     count += filters.game_type.length
-    count += filters.supported_currency.length
+    count += filters.fiat_currency.length
+    count += filters.crypto_currency.length
     count += filters.restricted_country.length
     count += filters.regulated_country.length
     return count
@@ -178,7 +188,8 @@ export function useFilters() {
     setSearch,
     setGameType,
     setCurrencyMode,
-    setSupportedCurrency,
+    setFiatCurrency,
+    setCryptoCurrency,
     setRestrictedCountry,
     setRegulatedCountry,
     removeFilter,

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(docker compose logs:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

@@ -30,28 +30,22 @@ function CheckCircleIcon() {
   )
 }
 
-// Simple ISO2 to emoji flag conversion
-function getFlag(iso2) {
-  if (!iso2 || iso2.length !== 2) return '🏳️'
-  const codePoints = [...iso2.toUpperCase()].map(c => 127397 + c.charCodeAt(0))
-  return String.fromCodePoint(...codePoints)
-}
-
-function CountryBadge({ country, type }) {
-  const iso2 = country.country_code?.substring(0, 2) || country.country_code
+function CountryBadge({ country, type, countryLookup = {} }) {
+  const code = country.country_code
+  const name = countryLookup[code]
   return (
     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full ${
       type === 'restricted'
         ? 'bg-error/10 text-error'
         : 'bg-primary/10 text-primary'
     }`}>
-      <span>{getFlag(iso2)}</span>
-      <span>{iso2}</span>
+      <span className="opacity-60 font-mono text-xs">{code}</span>
+      {name && <span>{name}</span>}
     </span>
   )
 }
 
-export function CountryModal({ isOpen, onClose, provider }) {
+export function CountryModal({ isOpen, onClose, provider, countryLookup = {} }) {
   const [activeTab, setActiveTab] = useState('restricted')
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -59,22 +53,24 @@ export function CountryModal({ isOpen, onClose, provider }) {
   const restrictedCountries = restrictions.filter(r => r.restriction_type === 'RESTRICTED')
   const regulatedCountries = restrictions.filter(r => r.restriction_type === 'REGULATED')
 
-  // Filter countries by search term
+  // Filter countries by search term (matches code or name)
   const filteredRestricted = useMemo(() => {
     if (!searchTerm) return restrictedCountries
     const term = searchTerm.toLowerCase()
     return restrictedCountries.filter(c =>
-      c.country_code.toLowerCase().includes(term)
+      c.country_code.toLowerCase().includes(term) ||
+      (countryLookup[c.country_code] || '').toLowerCase().includes(term)
     )
-  }, [restrictedCountries, searchTerm])
+  }, [restrictedCountries, searchTerm, countryLookup])
 
   const filteredRegulated = useMemo(() => {
     if (!searchTerm) return regulatedCountries
     const term = searchTerm.toLowerCase()
     return regulatedCountries.filter(c =>
-      c.country_code.toLowerCase().includes(term)
+      c.country_code.toLowerCase().includes(term) ||
+      (countryLookup[c.country_code] || '').toLowerCase().includes(term)
     )
-  }, [regulatedCountries, searchTerm])
+  }, [regulatedCountries, searchTerm, countryLookup])
 
   const handleExport = () => {
     const rows = restrictions.map(r => ({
@@ -159,7 +155,7 @@ export function CountryModal({ isOpen, onClose, provider }) {
               <>
                 <div className="flex flex-wrap gap-2">
                   {filteredRestricted.map(c => (
-                    <CountryBadge key={c.country_code} country={c} type="restricted" />
+                    <CountryBadge key={c.country_code} country={c} type="restricted" countryLookup={countryLookup} />
                   ))}
                 </div>
                 <p className="text-xs text-text-muted">
@@ -180,7 +176,7 @@ export function CountryModal({ isOpen, onClose, provider }) {
               <>
                 <div className="flex flex-wrap gap-2">
                   {filteredRegulated.map(c => (
-                    <CountryBadge key={c.country_code} country={c} type="regulated" />
+                    <CountryBadge key={c.country_code} country={c} type="regulated" countryLookup={countryLookup} />
                   ))}
                 </div>
                 <p className="text-xs text-text-muted">

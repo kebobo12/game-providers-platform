@@ -15,7 +15,8 @@ class ProviderFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
     game_type = django_filters.CharFilter(method='filter_game_type')
     currency_mode = django_filters.ChoiceFilter(choices=Provider.CurrencyMode.choices)
-    supported_currency = django_filters.CharFilter(method='filter_supported_currency')
+    fiat_currency = django_filters.CharFilter(method='filter_fiat_currency')
+    crypto_currency = django_filters.CharFilter(method='filter_crypto_currency')
     restricted_country = django_filters.CharFilter(method='filter_restricted_country')
     regulated_country = django_filters.CharFilter(method='filter_regulated_country')
 
@@ -30,37 +31,59 @@ class ProviderFilter(django_filters.FilterSet):
         return queryset.filter(provider_name__icontains=value)
 
     def filter_game_type(self, queryset, name, value):
-        """Filter providers that have games of the specified type."""
+        """Filter providers that have games of the specified types (comma-separated)."""
         if not value:
             return queryset
-        return queryset.filter(games__game_type__iexact=value).distinct()
+        types = [t.strip() for t in value.split(',') if t.strip()]
+        if not types:
+            return queryset
+        return queryset.filter(games__game_type__in=types).distinct()
 
-    def filter_supported_currency(self, queryset, name, value):
-        """Filter providers that support the specified currency (fiat or crypto)."""
+    def filter_fiat_currency(self, queryset, name, value):
+        """Filter providers that support the specified fiat currencies (comma-separated)."""
         if not value:
+            return queryset
+        codes = [c.strip() for c in value.split(',') if c.strip()]
+        if not codes:
             return queryset
         return queryset.filter(
-            Q(fiat_currencies__currency_code__iexact=value) |
-            Q(crypto_currencies__currency_code__iexact=value)
+            fiat_currencies__currency_code__in=codes
+        ).distinct()
+
+    def filter_crypto_currency(self, queryset, name, value):
+        """Filter providers that support the specified crypto currencies (comma-separated)."""
+        if not value:
+            return queryset
+        codes = [c.strip() for c in value.split(',') if c.strip()]
+        if not codes:
+            return queryset
+        return queryset.filter(
+            crypto_currencies__currency_code__in=codes
         ).distinct()
 
     def filter_restricted_country(self, queryset, name, value):
-        """Filter providers that have the specified country as restricted."""
+        """Filter providers that have the specified countries as restricted (comma-separated)."""
         if not value:
             return queryset
+        codes = [c.strip() for c in value.split(',') if c.strip()]
+        if not codes:
+            return queryset
         return queryset.filter(
-            restrictions__country_code__iexact=value,
+            restrictions__country_code__in=codes,
             restrictions__restriction_type='RESTRICTED'
         ).distinct()
 
     def filter_regulated_country(self, queryset, name, value):
-        """Filter providers that have the specified country as regulated."""
+        """Filter providers that support the specified countries (NOT restricted there)."""
         if not value:
             return queryset
-        return queryset.filter(
-            restrictions__country_code__iexact=value,
-            restrictions__restriction_type='REGULATED'
-        ).distinct()
+        codes = [c.strip() for c in value.split(',') if c.strip()]
+        if not codes:
+            return queryset
+        return queryset.exclude(
+            restrictions__country_code__in=codes,
+            restrictions__restriction_type='RESTRICTED'
+        )
 
 
 class GameFilter(django_filters.FilterSet):
