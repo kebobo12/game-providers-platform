@@ -49,19 +49,6 @@ function getColorFromString(str) {
   return colors[Math.abs(hash) % colors.length]
 }
 
-// Map game type to color-coded pill class
-function getGameTypePillClass(type) {
-  const t = type.toLowerCase()
-  if (t.includes('slot')) return 'bg-pill-slots/15 text-pill-slots'
-  if (t.includes('crash')) return 'bg-pill-crash/15 text-pill-crash'
-  if (t.includes('table')) return 'bg-pill-table/15 text-pill-table'
-  if (t.includes('live')) return 'bg-pill-live/15 text-pill-live'
-  if (t.includes('bingo')) return 'bg-pill-bingo/15 text-pill-bingo'
-  if (t.includes('lottery') || t.includes('keno')) return 'bg-pill-lottery/15 text-pill-lottery'
-  if (t.includes('poker')) return 'bg-pill-poker/15 text-pill-poker'
-  return 'bg-pill-default/15 text-pill-default'
-}
-
 // Map currency mode to color-coded badge class
 function getCurrencyModeClass(mode) {
   switch (mode) {
@@ -77,6 +64,35 @@ const currencyModeLabels = {
   'ALL_FIAT': 'All Fiat',
   'LIST': 'Custom List',
   'ALL_CRYPTO': 'All Crypto',
+}
+
+// Human-readable game type labels
+const GAME_TYPE_LABELS = {
+  'cards': 'Cards',
+  'crashgame': 'Crash Games',
+  'crash': 'Crash Games',
+  'dice': 'Dice',
+  'instantgame': 'Instant Games',
+  'interactivegame': 'Interactive Games',
+  'slots': 'Slots',
+  'virtual': 'Virtual',
+  'bingo': 'Bingo',
+  'poker': 'Poker',
+  'tablegame': 'Table Games',
+  'table': 'Table Games',
+  'livecasino': 'Live Casino',
+  'live': 'Live Casino',
+  'lottery': 'Lottery',
+  'keno': 'Keno',
+}
+
+function formatGameType(type) {
+  const lower = type.toLowerCase()
+  if (GAME_TYPE_LABELS[lower]) return GAME_TYPE_LABELS[lower]
+  // Fallback: insert space before uppercase letters, capitalize first
+  return type
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^./, c => c.toUpperCase())
 }
 
 function getProviderLogoUrl(provider, isDark) {
@@ -100,7 +116,7 @@ function ProviderLogo({ provider }) {
 
   if (logoUrl && !imgFailed) {
     return (
-      <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden">
+      <div className="flex-shrink-0 w-20 h-20 rounded-lg bg-muted-bg p-2">
         <img
           src={logoUrl}
           alt={provider.provider_name}
@@ -112,11 +128,13 @@ function ProviderLogo({ provider }) {
   }
 
   return (
-    <div className={`flex-shrink-0 w-12 h-12 rounded-lg border border-border flex items-center justify-center font-bold text-lg ${colorClass}`}>
+    <div className={`flex-shrink-0 w-20 h-20 rounded-lg bg-muted-bg flex items-center justify-center font-bold text-xl ${colorClass}`}>
       {initials}
     </div>
   )
 }
+
+const PILL_LIMIT = 4
 
 export function ProviderCard({ provider, isExpanded, onToggle }) {
   const [hasExpanded, setHasExpanded] = useState(false)
@@ -139,6 +157,7 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
   }
 
   const gameCount = provider.game_count ?? 0
+  const gameTypes = provider.supported_game_types ?? []
 
   return (
     <>
@@ -151,9 +170,9 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
         <button
           type="button"
           onClick={onToggle}
-          className="w-full text-left p-4 flex items-center gap-4 cursor-pointer hover:bg-muted-bg transition-colors"
+          className="w-full text-left p-4 flex items-center gap-4 cursor-pointer hover:bg-muted-bg/50 transition-colors"
         >
-          {/* Provider logo/initials */}
+          {/* Provider logo */}
           <ProviderLogo provider={provider} />
 
           {/* Provider info */}
@@ -168,8 +187,9 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
                 {provider.status}
               </span>
             </div>
-            <div className="flex items-center gap-3 mt-1">
-              {/* Clickable game count */}
+
+            {/* Game count */}
+            <div className="mt-1">
               <span
                 role="button"
                 tabIndex={0}
@@ -179,28 +199,30 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
                     handleGameCountClick(e)
                   }
                 }}
-                className="text-sm text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors"
+                className="text-sm font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors"
               >
                 {gameCount} games
               </span>
-              {provider.supported_game_types?.length > 0 && (
-                <div className="hidden sm:flex flex-wrap gap-1">
-                  {provider.supported_game_types.slice(0, 3).map(type => (
-                    <span
-                      key={type}
-                      className={`text-xs px-2 py-0.5 rounded ${getGameTypePillClass(type)}`}
-                    >
-                      {type}
-                    </span>
-                  ))}
-                  {provider.supported_game_types.length > 3 && (
-                    <span className="text-xs px-2 py-0.5 bg-pill-default/10 text-pill-default rounded">
-                      +{provider.supported_game_types.length - 3}
-                    </span>
-                  )}
-                </div>
-              )}
             </div>
+
+            {/* Game type pills */}
+            {gameTypes.length > 0 && (
+              <div className="hidden sm:flex flex-wrap gap-1.5 mt-2">
+                {gameTypes.slice(0, PILL_LIMIT).map(type => (
+                  <span
+                    key={type}
+                    className="text-xs px-2.5 py-0.5 rounded-full border border-border text-text-muted"
+                  >
+                    {formatGameType(type)}
+                  </span>
+                ))}
+                {gameTypes.length > PILL_LIMIT && (
+                  <span className="text-xs px-2.5 py-0.5 rounded-full border border-border text-text-muted">
+                    +{gameTypes.length - PILL_LIMIT}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Currency mode badge */}

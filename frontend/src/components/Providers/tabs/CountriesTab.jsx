@@ -131,7 +131,7 @@ export function CountriesTab({ provider }) {
         )}
 
         {/* Content */}
-        <div className="min-h-[100px]">
+        <div>
           {effectiveTab === 'restricted' && (
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2">
