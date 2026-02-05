@@ -27,9 +27,7 @@ function CountryBadge({ country, type, countryLookup = {} }) {
   const name = countryLookup[code]
   return (
     <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
-      type === 'restricted'
-        ? 'bg-error/10 text-error'
-        : 'bg-success/10 text-success'
+      type === 'restricted' ? 'badge-restricted' : 'badge-regulated'
     }`}>
       <span className="opacity-50 font-mono text-xs">{code}</span>
       {name && <span>{name}</span>}
@@ -41,7 +39,7 @@ const PREVIEW_LIMIT = 20
 
 export function CountriesTab({ provider }) {
   const [activeSubTab, setActiveSubTab] = useState('restricted')
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalTab, setModalTab] = useState(null)
   const { countryLookup } = useFilterOptions()
 
   if (!provider) return null
@@ -49,6 +47,11 @@ export function CountriesTab({ provider }) {
   const restrictions = provider.restrictions ?? []
   const restrictedCountries = restrictions.filter(r => r.restriction_type === 'RESTRICTED')
   const regulatedCountries = restrictions.filter(r => r.restriction_type === 'REGULATED')
+
+  const hasRestricted = restrictedCountries.length > 0
+  const hasRegulated = regulatedCountries.length > 0
+  const hasBoth = hasRestricted && hasRegulated
+  const effectiveTab = hasBoth ? activeSubTab : (hasRestricted ? 'restricted' : hasRegulated ? 'regulated' : null)
 
   const handleExport = () => {
     const rows = restrictions.map(r => ({
@@ -79,7 +82,7 @@ export function CountriesTab({ provider }) {
             {showViewAll && (
               <button
                 type="button"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => setModalTab(effectiveTab)}
                 className="text-sm font-medium text-primary hover:text-primary-hover transition-colors"
               >
                 View All
@@ -91,100 +94,101 @@ export function CountriesTab({ provider }) {
           </div>
         </div>
 
-        {/* Sub-tabs — filled toggle */}
-        <div className="flex border border-border rounded-lg overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('restricted')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-              activeSubTab === 'restricted'
-                ? 'bg-error text-white'
-                : 'text-text-muted hover:text-text'
-            }`}
-          >
-            <XCircleIcon />
-            Restricted ({restrictedCountries.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('regulated')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-              activeSubTab === 'regulated'
-                ? 'bg-success text-white'
-                : 'text-text-muted hover:text-text'
-            }`}
-          >
-            <CheckCircleIcon />
-            Regulated ({regulatedCountries.length})
-          </button>
-        </div>
+        {/* Sub-tabs — only show toggle when both types exist */}
+        {hasBoth ? (
+          <div className="flex border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('restricted')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                activeSubTab === 'restricted'
+                  ? 'bg-error text-white'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              <XCircleIcon />
+              Restricted ({restrictedCountries.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('regulated')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                activeSubTab === 'regulated'
+                  ? 'bg-success text-white'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              <CheckCircleIcon />
+              Regulated ({regulatedCountries.length})
+            </button>
+          </div>
+        ) : effectiveTab && (
+          <h4 className="text-sm font-medium text-text-muted flex items-center gap-2">
+            {effectiveTab === 'restricted'
+              ? <><XCircleIcon /> Restricted Countries</>
+              : <><CheckCircleIcon /> Regulated Countries</>}
+          </h4>
+        )}
 
         {/* Content */}
         <div className="min-h-[100px]">
-          {activeSubTab === 'restricted' && (
+          {effectiveTab === 'restricted' && (
             <div className="space-y-3">
-              {restrictedCountries.length === 0 ? (
-                <p className="text-text-muted text-sm py-4 text-center">No restricted countries</p>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {previewRestricted.map(c => (
-                      <CountryBadge key={c.country_code} country={c} type="restricted" countryLookup={countryLookup} />
-                    ))}
-                  </div>
-                  {restrictedCountries.length > PREVIEW_LIMIT && (
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="text-sm text-primary hover:text-primary-hover transition-colors"
-                    >
-                      +{restrictedCountries.length - PREVIEW_LIMIT} more restricted countries
-                    </button>
-                  )}
-                  <p className="text-xs text-text-muted mt-3">
-                    ⚠️ Games cannot be offered in these countries
-                  </p>
-                </>
+              <div className="flex flex-wrap gap-2">
+                {previewRestricted.map(c => (
+                  <CountryBadge key={c.country_code} country={c} type="restricted" countryLookup={countryLookup} />
+                ))}
+              </div>
+              {restrictedCountries.length > PREVIEW_LIMIT && (
+                <button
+                  type="button"
+                  onClick={() => setModalTab('restricted')}
+                  className="text-sm text-primary hover:text-primary-hover transition-colors"
+                >
+                  +{restrictedCountries.length - PREVIEW_LIMIT} more restricted countries
+                </button>
               )}
+              <p className="text-xs text-text-muted mt-3">
+                Games cannot be offered in these countries
+              </p>
             </div>
           )}
 
-          {activeSubTab === 'regulated' && (
+          {effectiveTab === 'regulated' && (
             <div className="space-y-3">
-              {regulatedCountries.length === 0 ? (
-                <p className="text-text-muted text-sm py-4 text-center">No regulated countries</p>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {previewRegulated.map(c => (
-                      <CountryBadge key={c.country_code} country={c} type="regulated" countryLookup={countryLookup} />
-                    ))}
-                  </div>
-                  {regulatedCountries.length > PREVIEW_LIMIT && (
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="text-sm text-primary hover:text-primary-hover transition-colors"
-                    >
-                      +{regulatedCountries.length - PREVIEW_LIMIT} more regulated countries
-                    </button>
-                  )}
-                  <p className="text-xs text-text-muted mt-3">
-                    ✓ Provider is licensed in these countries
-                  </p>
-                </>
+              <div className="flex flex-wrap gap-2">
+                {previewRegulated.map(c => (
+                  <CountryBadge key={c.country_code} country={c} type="regulated" countryLookup={countryLookup} />
+                ))}
+              </div>
+              {regulatedCountries.length > PREVIEW_LIMIT && (
+                <button
+                  type="button"
+                  onClick={() => setModalTab('regulated')}
+                  className="text-sm text-primary hover:text-primary-hover transition-colors"
+                >
+                  +{regulatedCountries.length - PREVIEW_LIMIT} more regulated countries
+                </button>
               )}
+              <p className="text-xs text-text-muted mt-3">
+                Provider is licensed in these countries
+              </p>
             </div>
+          )}
+
+          {!effectiveTab && (
+            <p className="text-text-muted text-sm py-4 text-center">No countries</p>
           )}
         </div>
       </div>
 
       {/* Modal */}
       <CountryModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={!!modalTab}
+        onClose={() => setModalTab(null)}
         provider={provider}
         countryLookup={countryLookup}
+        initialTab={modalTab}
       />
     </>
   )

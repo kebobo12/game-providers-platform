@@ -125,6 +125,14 @@
     color: var(--color-currency-crypto);
     background-color: color-mix(in srgb, var(--color-currency-crypto) 10%, transparent);
   }
+  .badge-restricted {
+    color: var(--color-error);
+    background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
+  }
+  .badge-regulated {
+    color: var(--color-success);
+    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
+  }
 
   .bg-checkerboard {
     background-image: conic-gradient(

@@ -62,7 +62,7 @@ function CurrencyBadge({ code, type }) {
   const name = CURRENCY_NAMES[code]
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
+      className={`flex items-center justify-center gap-1 py-2 text-sm font-medium rounded-lg ${
         type === 'fiat' ? 'badge-fiat' : 'badge-crypto'
       }`}
       title={name || undefined}
@@ -202,7 +202,7 @@ export function CurrencyModal({ isOpen, onClose, provider, initialTab }) {
                 No fiat currencies match your search
               </p>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(70px,1fr))] gap-2">
                 {filteredFiat.map(c => (
                   <CurrencyBadge key={c.currency_code} code={c.currency_code} type="fiat" />
                 ))}
@@ -218,7 +218,7 @@ export function CurrencyModal({ isOpen, onClose, provider, initialTab }) {
                 No cryptocurrencies match your search
               </p>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(70px,1fr))] gap-2">
                 {filteredCrypto.map(c => (
                   <CurrencyBadge key={c.currency_code} code={c.currency_code} type="crypto" />
                 ))}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Modal } from './Modal'
 import { ExportButton, downloadCSV, arrayToCSV } from '../shared'
 
@@ -34,24 +34,35 @@ function CountryBadge({ country, type, countryLookup = {} }) {
   const code = country.country_code
   const name = countryLookup[code]
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-full ${
-      type === 'restricted'
-        ? 'bg-error/10 text-error'
-        : 'bg-success/10 text-success'
+    <span className={`flex items-center gap-1.5 py-2 px-2 text-sm font-medium rounded-lg ${
+      type === 'restricted' ? 'badge-restricted' : 'badge-regulated'
     }`}>
       <span className="opacity-50 font-mono text-xs">{code}</span>
-      {name && <span>{name}</span>}
+      {name && <span className="truncate">{name}</span>}
     </span>
   )
 }
 
-export function CountryModal({ isOpen, onClose, provider, countryLookup = {} }) {
+export function CountryModal({ isOpen, onClose, provider, countryLookup = {}, initialTab }) {
   const [activeTab, setActiveTab] = useState('restricted')
   const [searchTerm, setSearchTerm] = useState('')
+
+  // Sync to the requested tab when modal opens
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab)
+      setSearchTerm('')
+    }
+  }, [isOpen, initialTab])
 
   const restrictions = provider?.restrictions ?? []
   const restrictedCountries = restrictions.filter(r => r.restriction_type === 'RESTRICTED')
   const regulatedCountries = restrictions.filter(r => r.restriction_type === 'REGULATED')
+
+  const hasRestricted = restrictedCountries.length > 0
+  const hasRegulated = regulatedCountries.length > 0
+  const hasBoth = hasRestricted && hasRegulated
+  const effectiveTab = hasBoth ? activeTab : (hasRestricted ? 'restricted' : hasRegulated ? 'regulated' : null)
 
   // Filter countries by search term (matches code or name)
   const filteredRestricted = useMemo(() => {
@@ -111,72 +122,80 @@ export function CountryModal({ isOpen, onClose, provider, countryLookup = {} }) 
         />
       </div>
 
-      {/* Tabs — filled toggle */}
-      <div className="flex border border-border rounded-lg overflow-hidden mb-4">
-        <button
-          type="button"
-          onClick={() => setActiveTab('restricted')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === 'restricted'
-              ? 'bg-error text-white'
-              : 'text-text-muted hover:text-text'
-          }`}
-        >
-          <XCircleIcon />
-          Restricted ({restrictedCountries.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('regulated')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === 'regulated'
-              ? 'bg-success text-white'
-              : 'text-text-muted hover:text-text'
-          }`}
-        >
-          <CheckCircleIcon />
-          Regulated ({regulatedCountries.length})
-        </button>
-      </div>
+      {/* Tabs — only show toggle when both types exist */}
+      {hasBoth ? (
+        <div className="flex border border-border rounded-lg overflow-hidden mb-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab('restricted')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'restricted'
+                ? 'bg-error text-white'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <XCircleIcon />
+            Restricted ({restrictedCountries.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('regulated')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'regulated'
+                ? 'bg-success text-white'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <CheckCircleIcon />
+            Regulated ({regulatedCountries.length})
+          </button>
+        </div>
+      ) : effectiveTab && (
+        <h4 className="text-sm font-medium text-text-muted flex items-center gap-2 mb-4">
+          {effectiveTab === 'restricted'
+            ? <><XCircleIcon /> Restricted Countries</>
+            : <><CheckCircleIcon /> Regulated Countries</>}
+        </h4>
+      )}
 
       {/* Content */}
       <div className="min-h-[200px]">
-        {activeTab === 'restricted' && (
+        {effectiveTab === 'restricted' && (
           <div className="space-y-4">
             {filteredRestricted.length === 0 ? (
               <p className="text-text-muted text-sm py-8 text-center">
-                {searchTerm ? 'No restricted countries match your search' : 'No restricted countries'}
+                No restricted countries match your search
               </p>
             ) : (
               <>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                   {filteredRestricted.map(c => (
                     <CountryBadge key={c.country_code} country={c} type="restricted" countryLookup={countryLookup} />
                   ))}
                 </div>
                 <p className="text-xs text-text-muted">
-                  ⚠️ Games cannot be offered in these countries
+                  Games cannot be offered in these countries
                 </p>
               </>
             )}
           </div>
         )}
 
-        {activeTab === 'regulated' && (
+        {effectiveTab === 'regulated' && (
           <div className="space-y-4">
             {filteredRegulated.length === 0 ? (
               <p className="text-text-muted text-sm py-8 text-center">
-                {searchTerm ? 'No regulated countries match your search' : 'No regulated countries'}
+                No regulated countries match your search
               </p>
             ) : (
               <>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
                   {filteredRegulated.map(c => (
                     <CountryBadge key={c.country_code} country={c} type="regulated" countryLookup={countryLookup} />
                   ))}
                 </div>
                 <p className="text-xs text-text-muted">
-                  ✓ Provider is licensed in these countries
+                  Provider is licensed in these countries
                 </p>
               </>
             )}
