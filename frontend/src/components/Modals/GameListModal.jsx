@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useProviderGames } from '../../hooks/useProviderGames'
 import { Modal } from './Modal'
 import { Pagination, ExportButton, downloadCSV, arrayToCSV } from '../shared'
@@ -27,40 +27,202 @@ function LoadingSpinner() {
 
 const VOLATILITY_OPTIONS = [
   { value: '', label: 'All Volatility' },
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
+  { value: '1', label: 'Low' },
+  { value: '2', label: 'Medium Low' },
+  { value: '3', label: 'Medium' },
+  { value: '4', label: 'Medium High' },
+  { value: '5', label: 'High' },
 ]
+
+const RTP_RANGES = [
+  { value: '', label: 'All RTP' },
+  { value: '<90', label: '< 90%', min: null, max: '89.99' },
+  { value: '90-94', label: '90% – 94%', min: '90', max: '93.99' },
+  { value: '94-96', label: '94% – 96%', min: '94', max: '95.99' },
+  { value: '96-98', label: '96% – 98%', min: '96', max: '97.99' },
+  { value: '>98', label: '> 98%', min: '98', max: null },
+]
+
+function parseThemes(raw) {
+  if (!raw) return []
+  const trimmed = raw.trim()
+  if (trimmed.startsWith('[')) {
+    try {
+      return JSON.parse(trimmed).map(String).filter(Boolean)
+    } catch { /* fall through */ }
+  }
+  return trimmed.split(',').map(s => s.trim()).filter(Boolean)
+}
+
+function FilterSelect({ value, onChange, children }) {
+  return (
+    <select
+      value={value}
+      onChange={onChange}
+      className="px-3 py-2 bg-surface border border-input-border rounded-lg text-text text-sm
+                 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+    >
+      {children}
+    </select>
+  )
+}
+
+function ChevronDownSmall() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  )
+}
+
+function SearchableSelect({ value, options, placeholder, onSelect }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const containerRef = useRef(null)
+  const inputRef = useRef(null)
+
+  const filtered = useMemo(() => {
+    if (!search) return options
+    const lower = search.toLowerCase()
+    return options.filter(o => o.label.toLowerCase().includes(lower))
+  }, [options, search])
+
+  const selectedLabel = value
+    ? (options.find(o => o.value === value)?.label ?? value)
+    : placeholder
+
+  useEffect(() => {
+    if (!isOpen) return
+    function handleClick(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false)
+        setSearch('')
+      }
+    }
+    function handleKey(e) {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+        setSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) inputRef.current.focus()
+  }, [isOpen])
+
+  const handleSelect = (val) => {
+    onSelect(val)
+    setIsOpen(false)
+    setSearch('')
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2 px-3 py-2 bg-surface border rounded-lg text-sm cursor-pointer
+                   transition-colors ${isOpen ? 'border-primary ring-1 ring-primary' : 'border-input-border'}
+                   ${value ? 'text-text' : 'text-text-muted'}`}
+      >
+        <span className="truncate max-w-[150px]">{selectedLabel}</span>
+        <ChevronDownSmall />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-50 w-64 max-h-80 overflow-hidden">
+          <div className="p-2 border-b border-border">
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search..."
+              className="w-full px-3 py-1.5 bg-bg border border-input-border rounded text-sm text-text placeholder-text-muted
+                         focus:outline-none focus:border-primary"
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => handleSelect('')}
+              className={`w-full px-4 py-2 text-left text-sm cursor-pointer transition-colors
+                         ${!value ? 'text-primary font-medium bg-primary/5' : 'text-text hover:bg-muted-bg'}`}
+            >
+              {placeholder}
+            </button>
+            {filtered.map(opt => (
+              <button
+                type="button"
+                key={opt.value}
+                onClick={() => handleSelect(opt.value)}
+                className={`w-full px-4 py-2 text-left text-sm cursor-pointer transition-colors
+                           ${value === opt.value ? 'text-primary font-medium bg-primary/5' : 'text-text hover:bg-muted-bg'}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+            {filtered.length === 0 && (
+              <div className="px-4 py-3 text-sm text-text-muted text-center">No matches</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function GameListModal({ isOpen, onClose, provider }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [volatilityFilter, setVolatilityFilter] = useState('')
+  const [rtpRange, setRtpRange] = useState('')
+  const [themeFilter, setThemeFilter] = useState('')
   const [page, setPage] = useState(1)
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [distinctThemes, setDistinctThemes] = useState([])
+  const debounceRef = useRef(null)
 
-  // Debounce search
+  // Fetch distinct themes once when modal opens
+  useEffect(() => {
+    if (!isOpen || !provider?.id) return
+    let cancelled = false
+    api.get(`/providers/${provider.id}/games/?page_size=10000`).then(data => {
+      if (cancelled) return
+      const themeSet = new Set()
+      for (const game of data.results ?? []) {
+        for (const t of parseThemes(game.themes)) themeSet.add(t)
+      }
+      setDistinctThemes(Array.from(themeSet).sort())
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [isOpen, provider?.id])
+
   const handleSearchChange = useCallback((e) => {
     const value = e.target.value
     setSearchTerm(value)
     setPage(1)
-
-    // Simple debounce
-    const timeoutId = setTimeout(() => {
-      setDebouncedSearch(value)
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => setDebouncedSearch(value), 300)
   }, [])
 
-  const handleVolatilityChange = useCallback((e) => {
-    setVolatilityFilter(e.target.value)
-    setPage(1)
-  }, [])
+  const selectedRtp = RTP_RANGES.find(r => r.value === rtpRange)
 
   const filters = useMemo(() => ({
     search: debouncedSearch,
     volatility: volatilityFilter,
-  }), [debouncedSearch, volatilityFilter])
+    rtp_min: selectedRtp?.min || '',
+    rtp_max: selectedRtp?.max || '',
+    theme: themeFilter,
+  }), [debouncedSearch, volatilityFilter, selectedRtp, themeFilter])
+
+  const hasActiveFilters = debouncedSearch || volatilityFilter || rtpRange || themeFilter
 
   const {
     games,
@@ -71,10 +233,22 @@ export function GameListModal({ isOpen, onClose, provider }) {
     isFetching,
   } = useProviderGames(provider?.id, filters, page, { enabled: isOpen && !!provider?.id })
 
+  const handleClearFilters = useCallback(() => {
+    setSearchTerm('')
+    setDebouncedSearch('')
+    setVolatilityFilter('')
+    setRtpRange('')
+    setThemeFilter('')
+    setPage(1)
+  }, [])
+
   const handleExport = async () => {
     const params = new URLSearchParams()
     if (debouncedSearch) params.set('search', debouncedSearch)
     if (volatilityFilter) params.set('volatility', volatilityFilter)
+    if (selectedRtp?.min) params.set('rtp_min', selectedRtp.min)
+    if (selectedRtp?.max) params.set('rtp_max', selectedRtp.max)
+    if (themeFilter) params.set('theme', themeFilter)
     params.set('page_size', '10000')
 
     const data = await api.get(`/providers/${provider.id}/games/?${params.toString()}`)
@@ -93,29 +267,31 @@ export function GameListModal({ isOpen, onClose, provider }) {
     downloadCSV(csv, `${provider.provider_name}_games`)
   }
 
-  // Reset state when modal closes
   const handleClose = () => {
-    setSearchTerm('')
-    setDebouncedSearch('')
-    setVolatilityFilter('')
-    setPage(1)
+    handleClearFilters()
+    setDistinctThemes([])
     onClose()
   }
+
+  const gameCountLabel = provider?.game_count ?? totalCount
+  const subtitle = hasActiveFilters
+    ? `${totalCount} of ${gameCountLabel} games`
+    : `${totalCount} ${totalCount === 1 ? 'game' : 'games'}`
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
       title={`Games — ${provider?.provider_name}`}
-      subtitle={`${totalCount} ${totalCount === 1 ? 'game' : 'games'}`}
+      subtitle={subtitle}
       size="xl"
       footer={
         totalCount > 0 && <ExportButton onClick={handleExport} label="Export CSV" />
       }
     >
-      {/* Search and filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1">
+      {/* Search */}
+      <div className="mb-3">
+        <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
             <SearchIcon />
           </span>
@@ -129,17 +305,46 @@ export function GameListModal({ isOpen, onClose, provider }) {
                        focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
+      </div>
 
-        <select
+      {/* Filter dropdowns */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <FilterSelect
           value={volatilityFilter}
-          onChange={handleVolatilityChange}
-          className="px-3 py-2 bg-surface border border-input-border rounded-lg text-text
-                     focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          onChange={(e) => { setVolatilityFilter(e.target.value); setPage(1) }}
         >
           {VOLATILITY_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
-        </select>
+        </FilterSelect>
+
+        <FilterSelect
+          value={rtpRange}
+          onChange={(e) => { setRtpRange(e.target.value); setPage(1) }}
+        >
+          {RTP_RANGES.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </FilterSelect>
+
+        {distinctThemes.length > 0 && (
+          <SearchableSelect
+            value={themeFilter}
+            options={distinctThemes.map(t => ({ value: t, label: t }))}
+            placeholder="All Themes"
+            onSelect={(val) => { setThemeFilter(val); setPage(1) }}
+          />
+        )}
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="px-3 py-2 text-sm text-primary hover:text-primary-hover transition-colors cursor-pointer"
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {/* Loading indicator */}
@@ -164,7 +369,6 @@ export function GameListModal({ isOpen, onClose, provider }) {
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination
               currentPage={currentPage}

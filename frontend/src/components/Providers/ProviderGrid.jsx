@@ -79,7 +79,7 @@ export function ProviderGrid({
 
   if (isLoading) {
     return (
-      <div className="bg-surface border border-border rounded-lg p-6">
+      <div className="bg-bg border border-border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="h-6 bg-border rounded w-40 animate-pulse" />
         </div>
@@ -89,7 +89,7 @@ export function ProviderGrid({
   }
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-6">
+    <div className="bg-bg border border-border rounded-lg p-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-text">

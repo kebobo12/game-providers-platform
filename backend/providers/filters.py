@@ -93,6 +93,8 @@ class GameFilter(django_filters.FilterSet):
     volatility = django_filters.CharFilter(field_name='volatility', lookup_expr='iexact')
     game_type = django_filters.CharFilter(field_name='game_type', lookup_expr='iexact')
     rtp_min = django_filters.NumberFilter(field_name='rtp', lookup_expr='gte')
+    rtp_max = django_filters.NumberFilter(field_name='rtp', lookup_expr='lte')
+    theme = django_filters.CharFilter(method='filter_theme')
     enabled = django_filters.BooleanFilter()
 
     class Meta:
@@ -107,3 +109,9 @@ class GameFilter(django_filters.FilterSet):
             Q(game_title__icontains=value) |
             Q(title__icontains=value)
         )
+
+    def filter_theme(self, queryset, name, value):
+        """Filter games whose themes field contains the given theme (case-insensitive)."""
+        if not value:
+            return queryset
+        return queryset.filter(themes__icontains=value)
