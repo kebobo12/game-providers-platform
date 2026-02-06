@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-EXPOSE 8000
+# Collect static files
+RUN python manage.py collectstatic --noinput
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Railway provides PORT env var
+CMD python manage.py migrate && gunicorn config.wsgi --bind 0.0.0.0:${PORT:-8000}
