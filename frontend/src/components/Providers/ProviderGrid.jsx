@@ -89,7 +89,7 @@ export function ProviderGrid({
   return (
     <div className="bg-surface border border-border rounded-lg p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div className="flex items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-text">
           Providers
           <span className="text-sm text-text-muted font-normal ml-2">

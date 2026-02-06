@@ -99,11 +99,11 @@ function ProviderLogo({ provider }) {
 
   if (logoUrl && !imgFailed) {
     return (
-      <div className="flex-shrink-0 w-36 h-16 rounded-lg bg-muted-bg p-2">
+      <div className="flex-shrink-0 w-[70px] sm:w-[170px] flex items-center justify-center">
         <img
           src={logoUrl}
           alt={provider.provider_name}
-          className="w-full h-full object-contain"
+          className="max-w-[60px] sm:max-w-[155px] max-h-[40px] sm:max-h-[60px] object-contain"
           onError={() => setImgFailed(true)}
         />
       </div>
@@ -111,8 +111,10 @@ function ProviderLogo({ provider }) {
   }
 
   return (
-    <div className={`flex-shrink-0 w-36 h-16 rounded-lg bg-muted-bg flex items-center justify-center font-bold text-2xl ${colorClass}`}>
-      {initials}
+    <div className={`flex-shrink-0 w-[70px] sm:w-[170px] flex items-center justify-center`}>
+      <div className={`px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg bg-muted-bg font-bold text-lg sm:text-2xl ${colorClass}`}>
+        {initials}
+      </div>
     </div>
   )
 }
@@ -148,7 +150,7 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
 
           {/* Provider info */}
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-lg text-text truncate">{provider.provider_name}</h4>
+            <h4 className="font-semibold text-base sm:text-lg text-text line-clamp-2">{provider.provider_name}</h4>
 
             {/* Game count */}
             <div className="mt-1">
