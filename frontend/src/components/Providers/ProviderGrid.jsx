@@ -48,14 +48,15 @@ export function ProviderGrid({
   const { showSuccess } = useToast()
 
   const handleExport = () => {
-    // Build query params from filters
+    // Build query params from filters (must match backend ProviderFilter field names)
     const params = new URLSearchParams()
     if (filters?.search) params.set('search', filters.search)
     if (filters?.currency_mode) params.set('currency_mode', filters.currency_mode)
-    filters?.game_type?.forEach(v => params.append('game_type', v))
-    filters?.supported_currency?.forEach(v => params.append('supported_currency', v))
-    filters?.restricted_country?.forEach(v => params.append('restricted_country', v))
-    filters?.regulated_country?.forEach(v => params.append('regulated_country', v))
+    if (filters?.game_type?.length) params.set('game_type', filters.game_type.join(','))
+    if (filters?.fiat_currency?.length) params.set('fiat_currency', filters.fiat_currency.join(','))
+    if (filters?.crypto_currency?.length) params.set('crypto_currency', filters.crypto_currency.join(','))
+    if (filters?.restricted_country?.length) params.set('restricted_country', filters.restricted_country.join(','))
+    if (filters?.regulated_country?.length) params.set('regulated_country', filters.regulated_country.join(','))
 
     const queryString = params.toString()
     const url = queryString ? `/api/providers/export/?${queryString}` : '/api/providers/export/'
