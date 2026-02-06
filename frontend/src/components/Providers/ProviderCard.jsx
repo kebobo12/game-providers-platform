@@ -120,19 +120,7 @@ function ProviderLogo({ provider }) {
 const PILL_LIMIT = 4
 
 export function ProviderCard({ provider, isExpanded, onToggle }) {
-  const [hasExpanded, setHasExpanded] = useState(false)
   const [isGamesModalOpen, setIsGamesModalOpen] = useState(false)
-
-  // Track if ever expanded (for lazy rendering during collapse animation)
-  useEffect(() => {
-    if (isExpanded) setHasExpanded(true)
-  }, [isExpanded])
-
-  // Only fetch detail when expanded (and not already cached)
-  const { provider: providerDetail, isLoading } = useProviderDetail(
-    provider.id,
-    { enabled: isExpanded }
-  )
 
   const handleGameCountClick = (e) => {
     e.stopPropagation()
@@ -146,7 +134,7 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
     <>
       <div className={`bg-surface border rounded-xl overflow-hidden transition-all duration-200 ${
         isExpanded
-          ? 'border-border col-span-full'
+          ? 'border-primary ring-1 ring-primary'
           : 'border-border hover:border-primary/50 hover:-translate-y-px hover:shadow-md'
       }`}>
         {/* Collapsed header - always visible */}
@@ -220,20 +208,6 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
             )}
           </div>
         </button>
-
-        {/* Expanded content with smooth open/close animation */}
-        <div className={`expand-grid ${isExpanded ? 'expanded' : ''}`}>
-          <div>
-            {hasExpanded && (
-              <div className="border-t border-border">
-                <ProviderTabs
-                  provider={providerDetail || provider}
-                  isLoading={isLoading}
-                />
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Games Modal */}
@@ -243,5 +217,37 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
         provider={provider}
       />
     </>
+  )
+}
+
+export function ExpandedPanel({ provider, isExpanded }) {
+  const [hasExpanded, setHasExpanded] = useState(false)
+
+  // Track if ever expanded (for lazy rendering during collapse animation)
+  useEffect(() => {
+    if (isExpanded) setHasExpanded(true)
+  }, [isExpanded])
+
+  // Only fetch detail when expanded
+  const { provider: providerDetail, isLoading } = useProviderDetail(
+    provider.id,
+    { enabled: isExpanded }
+  )
+
+  return (
+    <div className={`expand-grid ${isExpanded ? 'expanded' : ''}`}>
+      <div>
+        {hasExpanded && (
+          <div className="pt-4">
+            <div className="bg-surface border border-primary rounded-xl overflow-hidden">
+              <ProviderTabs
+                provider={providerDetail || provider}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

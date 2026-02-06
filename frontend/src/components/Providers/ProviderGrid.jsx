@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { ProviderCard } from './ProviderCard'
+import { useState, useMemo } from 'react'
+import { ProviderCard, ExpandedPanel } from './ProviderCard'
 import { Pagination, EmptyState, ExportButton, downloadCSV, arrayToCSV } from '../shared'
 import { api } from '../../api/client'
+
+const COLS = 2
 
 function LoadingSkeleton() {
   return (
@@ -35,6 +37,15 @@ export function ProviderGrid({
   onClearFilters,
 }) {
   const [expandedId, setExpandedId] = useState(null)
+
+  // Chunk providers into rows of COLS for rendering expansion panels after each row
+  const rows = useMemo(() => {
+    const result = []
+    for (let i = 0; i < providers.length; i += COLS) {
+      result.push(providers.slice(i, i + COLS))
+    }
+    return result
+  }, [providers])
 
   const handleExport = async () => {
     // Fetch all providers (not just current page) with active filters
@@ -103,15 +114,31 @@ export function ProviderGrid({
           onAction={onClearFilters}
         />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {providers.map(provider => (
-            <ProviderCard
-              key={provider.id}
-              provider={provider}
-              isExpanded={expandedId === provider.id}
-              onToggle={() => setExpandedId(prev => prev === provider.id ? null : provider.id)}
-            />
-          ))}
+        <div className="space-y-4">
+          {rows.map((row, rowIdx) => {
+            return (
+              <div key={rowIdx}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {row.map(provider => (
+                    <ProviderCard
+                      key={provider.id}
+                      provider={provider}
+                      isExpanded={expandedId === provider.id}
+                      onToggle={() => setExpandedId(prev => prev === provider.id ? null : provider.id)}
+                    />
+                  ))}
+                </div>
+                {/* Expanded panel below the row — one per provider to preserve animation on close */}
+                {row.map(provider => (
+                  <ExpandedPanel
+                    key={provider.id}
+                    provider={provider}
+                    isExpanded={expandedId === provider.id}
+                  />
+                ))}
+              </div>
+            )
+          })}
         </div>
       )}
 
