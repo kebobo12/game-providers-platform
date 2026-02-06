@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useSyncExternalStore } from 'react'
 import { useProviderGames } from '../../../hooks/useProviderGames'
 import { GameCard } from '../GameCard'
-import { Pagination, ExportButton, downloadCSV, arrayToCSV } from '../../shared'
+import { ExportButton, downloadCSV, arrayToCSV } from '../../shared'
 import { api } from '../../../api/client'
 import { GameListModal } from '../../Modals'
 
@@ -10,17 +10,6 @@ function SearchIcon() {
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="11" cy="11" r="8" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  )
-}
-
-function ExpandIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="15 3 21 3 21 9" />
-      <polyline points="9 21 3 21 3 15" />
-      <line x1="21" y1="3" x2="14" y2="10" />
-      <line x1="3" y1="21" x2="10" y2="14" />
     </svg>
   )
 }
@@ -36,6 +25,19 @@ function LoadingSpinner() {
   )
 }
 
+const PREVIEW_LIMIT_DESKTOP = 8
+const PREVIEW_LIMIT_MOBILE = 4
+
+const mdQuery = typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)') : null
+
+function useIsDesktop() {
+  return useSyncExternalStore(
+    (cb) => { mdQuery?.addEventListener('change', cb); return () => mdQuery?.removeEventListener('change', cb) },
+    () => mdQuery?.matches ?? true,
+    () => true,
+  )
+}
+
 const VOLATILITY_OPTIONS = [
   { value: '', label: 'All Volatility' },
   { value: 'low', label: 'Low' },
@@ -46,17 +48,13 @@ const VOLATILITY_OPTIONS = [
 export function GamesTab({ provider }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [volatilityFilter, setVolatilityFilter] = useState('')
-  const [page, setPage] = useState(1)
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Debounce search
   const handleSearchChange = useCallback((e) => {
     const value = e.target.value
     setSearchTerm(value)
-    setPage(1)
 
-    // Simple debounce
     const timeoutId = setTimeout(() => {
       setDebouncedSearch(value)
     }, 300)
@@ -66,7 +64,6 @@ export function GamesTab({ provider }) {
 
   const handleVolatilityChange = useCallback((e) => {
     setVolatilityFilter(e.target.value)
-    setPage(1)
   }, [])
 
   const filters = useMemo(() => ({
@@ -74,14 +71,18 @@ export function GamesTab({ provider }) {
     volatility: volatilityFilter,
   }), [debouncedSearch, volatilityFilter])
 
+  const isDesktop = useIsDesktop()
+  const previewLimit = isDesktop ? PREVIEW_LIMIT_DESKTOP : PREVIEW_LIMIT_MOBILE
+
   const {
     games,
     totalCount,
-    currentPage,
-    totalPages,
     isLoading,
     isFetching,
-  } = useProviderGames(provider?.id, filters, page, { enabled: !!provider?.id })
+  } = useProviderGames(provider?.id, filters, 1, { enabled: !!provider?.id })
+
+  const previewGames = games.slice(0, previewLimit)
+  const hasMore = totalCount > previewLimit
 
   const handleExport = async () => {
     const params = new URLSearchParams()
@@ -121,7 +122,7 @@ export function GamesTab({ provider }) {
               value={searchTerm}
               onChange={handleSearchChange}
               placeholder="Search games..."
-              className="w-full pl-10 pr-4 py-2 bg-surface border border-input-border rounded-lg
+              className="w-full pl-10 pr-4 py-2 bg-surface border border-input-border rounded-lg text-sm
                          text-text placeholder-text-muted
                          focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
@@ -130,7 +131,7 @@ export function GamesTab({ provider }) {
           <select
             value={volatilityFilter}
             onChange={handleVolatilityChange}
-            className="px-3 py-2 bg-surface border border-input-border rounded-lg text-text
+            className="px-3 py-2 bg-surface border border-input-border rounded-lg text-text text-sm
                        focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           >
             {VOLATILITY_OPTIONS.map(opt => (
@@ -139,22 +140,11 @@ export function GamesTab({ provider }) {
           </select>
 
           {totalCount > 0 && (
-            <>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg
-                           bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              >
-                <ExpandIcon />
-                View All
-              </button>
-              <ExportButton onClick={handleExport} />
-            </>
+            <ExportButton onClick={handleExport} />
           )}
         </div>
 
-        {/* Count and loading indicator */}
+        {/* Count */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-text-muted">
             {totalCount} {totalCount === 1 ? 'game' : 'games'}
@@ -164,29 +154,31 @@ export function GamesTab({ provider }) {
           )}
         </div>
 
-        {/* Games list */}
+        {/* Games preview grid — max 8 */}
         {isLoading ? (
           <LoadingSpinner />
-        ) : games.length === 0 ? (
+        ) : previewGames.length === 0 ? (
           <div className="text-center py-8 text-text-muted">
             <p>No games found matching your filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {games.map(game => (
+            {previewGames.map(game => (
               <GameCard key={game.id} game={game} />
             ))}
           </div>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            className="pt-4"
-          />
+        {/* View All link */}
+        {hasMore && (
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="w-full py-2.5 text-sm font-medium text-primary hover:text-primary-hover
+                       hover:bg-primary/5 rounded-lg transition-colors"
+          >
+            View All ({totalCount} games)
+          </button>
         )}
       </div>
 
