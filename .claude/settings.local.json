@@ -1,9 +1,15 @@
 {
+  "env": {
+    "ANTHROPIC_MODEL": "claude-opus-4-6"
+  },
   "permissions": {
     "allow": [
       "Bash(docker compose logs:*)",
       "Bash(curl:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx vite build)",
+      "Bash(docker compose exec:*)",
+      "Bash(python:*)"
     ]
   }
 }

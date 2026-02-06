@@ -92,6 +92,7 @@ class GameFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
     volatility = django_filters.CharFilter(field_name='volatility', lookup_expr='iexact')
     game_type = django_filters.CharFilter(field_name='game_type', lookup_expr='iexact')
+    rtp_min = django_filters.NumberFilter(field_name='rtp', lookup_expr='gte')
     enabled = django_filters.BooleanFilter()
 
     class Meta:

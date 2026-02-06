@@ -49,23 +49,6 @@ function getColorFromString(str) {
   return colors[Math.abs(hash) % colors.length]
 }
 
-// Map currency mode to color-coded badge class
-function getCurrencyModeClass(mode) {
-  switch (mode) {
-    case 'ALL_FIAT': return 'bg-currency-fiat/15 text-currency-fiat border-currency-fiat/30'
-    case 'ALL_CRYPTO': return 'bg-currency-crypto/15 text-currency-crypto border-currency-crypto/30'
-    case 'BOTH': return 'bg-currency-both/15 text-currency-both border-currency-both/30'
-    case 'LIST': return 'bg-currency-custom/15 text-currency-custom border-currency-custom/30'
-    default: return 'bg-text-muted/10 text-text-muted border-border'
-  }
-}
-
-const currencyModeLabels = {
-  'ALL_FIAT': 'All Fiat',
-  'LIST': 'Custom List',
-  'ALL_CRYPTO': 'All Crypto',
-}
-
 // Human-readable game type labels
 const GAME_TYPE_LABELS = {
   'cards': 'Cards',
@@ -222,15 +205,6 @@ export function ProviderCard({ provider, isExpanded, onToggle }) {
                   </span>
                 )}
               </div>
-            )}
-          </div>
-
-          {/* Currency mode badge */}
-          <div className="hidden md:flex items-center gap-3">
-            {provider.currency_mode && (
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium border ${getCurrencyModeClass(provider.currency_mode)}`}>
-                {currencyModeLabels[provider.currency_mode] || provider.currency_mode}
-              </span>
             )}
           </div>
 

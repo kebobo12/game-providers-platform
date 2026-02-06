@@ -7,8 +7,9 @@ import csv
 
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Count
-from django.http import StreamingHttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -126,6 +127,35 @@ def generate_csv_rows(queryset, fields, headers):
         yield writer.writerow(row)
 
 
+def build_csv_response(queryset, fields, headers, filename):
+    """Build a buffered CSV HttpResponse (works reliably through proxies)."""
+    import io
+
+    output = io.StringIO()
+    output.write('\ufeff')  # UTF-8 BOM
+    writer = csv.writer(output, delimiter=';')
+    writer.writerow(headers)
+
+    for obj in queryset:
+        row = []
+        for field in fields:
+            if '.' in field:
+                parts = field.split('.')
+                value = obj
+                for part in parts:
+                    value = getattr(value, part, '')
+            else:
+                value = getattr(obj, field, '')
+            row.append(value if value is not None else '')
+        writer.writerow(row)
+
+    content = output.getvalue()
+    response = HttpResponse(content, content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Content-Length'] = len(content.encode('utf-8'))
+    return response
+
+
 class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Provider model."""
 
@@ -151,7 +181,7 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['get'])
     def games(self, request, pk=None):
         """Return paginated games for a specific provider."""
-        provider = self.get_object()
+        provider = get_object_or_404(Provider, pk=pk)
         games = Game.objects.filter(provider=provider).select_related('provider')
 
         # Apply game filters
@@ -175,17 +205,12 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
         fields = ['id', 'provider_name', 'status', 'currency_mode', 'game_count']
         headers = ['ID', 'Provider Name', 'Status', 'Currency Mode', 'Game Count']
 
-        response = StreamingHttpResponse(
-            generate_csv_rows(queryset, fields, headers),
-            content_type='text/csv; charset=utf-8',
-        )
-        response['Content-Disposition'] = 'attachment; filename="providers.csv"'
-        return response
+        return build_csv_response(queryset, fields, headers, 'providers.csv')
 
     @action(detail=True, methods=['get'], url_path='games/export')
     def games_export(self, request, pk=None):
         """Export games for a specific provider as CSV."""
-        provider = self.get_object()
+        provider = get_object_or_404(Provider, pk=pk)
         games = Game.objects.filter(provider=provider).select_related('provider')
 
         # Apply game filters
@@ -201,12 +226,10 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
             'Enabled', 'Thumbnail'
         ]
 
-        response = StreamingHttpResponse(
-            generate_csv_rows(filtered_games, fields, headers),
-            content_type='text/csv; charset=utf-8',
+        return build_csv_response(
+            filtered_games, fields, headers,
+            f'{provider.provider_name}_games.csv',
         )
-        response['Content-Disposition'] = f'attachment; filename="{provider.provider_name}_games.csv"'
-        return response
 
 
 class CountryViewSet(viewsets.ReadOnlyModelViewSet):

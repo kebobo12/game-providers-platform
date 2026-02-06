@@ -7,6 +7,7 @@ function buildQueryParams(filters, page) {
   if (filters.search) params.set('search', filters.search)
   if (filters.volatility) params.set('volatility', filters.volatility)
   if (filters.game_type) params.set('game_type', filters.game_type)
+  if (filters.rtp_min) params.set('rtp_min', filters.rtp_min)
 
   params.set('page', page.toString())
 

@@ -56,34 +56,30 @@ export function ExportButton({
   )
 }
 
-// Utility to download CSV from data
+// Download data as Excel file using base64-encoded HTML table
 export function downloadCSV(data, filename) {
-  // Add UTF-8 BOM for Excel compatibility
-  const BOM = '\uFEFF'
-  const blob = new Blob([BOM + data], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
+  const uri = 'data:application/vnd.ms-excel;base64,' + btoa(unescape(encodeURIComponent(data)))
   const link = document.createElement('a')
-  link.href = url
-  link.download = `${filename}.csv`
+  link.href = uri
+  link.download = `${filename}.xls`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
 }
 
-// Convert array of objects to CSV string (semicolon-delimited for Excel)
+// Convert array of objects to an HTML table string for Excel
 export function arrayToCSV(headers, rows) {
-  const headerRow = headers.join(';')
-  const dataRows = rows.map(row =>
-    headers.map(h => {
-      const value = row[h] ?? ''
-      // Escape quotes and wrap in quotes if contains semicolon or quote
-      const str = String(value)
-      if (str.includes(';') || str.includes('"') || str.includes('\n')) {
-        return `"${str.replace(/"/g, '""')}"`
-      }
-      return str
-    }).join(';')
-  )
-  return [headerRow, ...dataRows].join('\r\n')
+  const esc = (val) => String(val ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const style = `
+    <style>
+      table { border-collapse: collapse; font-family: Calibri, Arial, sans-serif; font-size: 11pt; }
+      th, td { border: 1px solid #D0D0D0; padding: 6px 10px; text-align: left; }
+      th { background-color: #4472C4; color: #FFFFFF; font-weight: bold; }
+      tr:nth-child(even) td { background-color: #F2F2F2; }
+    </style>`
+  const ths = headers.map(h => `<th>${esc(h)}</th>`).join('')
+  const trs = rows.map(row =>
+    '<tr>' + headers.map(h => `<td>${esc(row[h])}</td>`).join('') + '</tr>'
+  ).join('')
+  return `<html><head><meta charset="utf-8">${style}</head><body><table><tr>${ths}</tr>${trs}</table></body></html>`
 }

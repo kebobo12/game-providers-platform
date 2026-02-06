@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useProviderGames } from '../../hooks/useProviderGames'
 import { Modal } from './Modal'
-import { Pagination, ExportButton } from '../shared'
+import { Pagination, ExportButton, downloadCSV, arrayToCSV } from '../shared'
+import { api } from '../../api/client'
 import { Lightbox } from './Lightbox'
 
 function SearchIcon() {
@@ -148,13 +149,26 @@ export function GameListModal({ isOpen, onClose, provider }) {
     isFetching,
   } = useProviderGames(provider?.id, filters, page, { enabled: isOpen && !!provider?.id })
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const params = new URLSearchParams()
     if (debouncedSearch) params.set('search', debouncedSearch)
     if (volatilityFilter) params.set('volatility', volatilityFilter)
+    params.set('page_size', '10000')
 
-    const url = `/api/providers/${provider.id}/games/export/?${params.toString()}`
-    window.open(url, '_blank')
+    const data = await api.get(`/providers/${provider.id}/games/?${params.toString()}`)
+    const allGames = data.results ?? []
+
+    const headers = ['Title', 'Type', 'Platform', 'RTP', 'Volatility', 'Enabled']
+    const rows = allGames.map(g => ({
+      'Title': g.game_title,
+      'Type': g.game_type,
+      'Platform': g.platform,
+      'RTP': g.rtp,
+      'Volatility': g.volatility,
+      'Enabled': g.enabled,
+    }))
+    const csv = arrayToCSV(headers, rows)
+    downloadCSV(csv, `${provider.provider_name}_games`)
   }
 
   const handleThumbnailClick = (game) => {

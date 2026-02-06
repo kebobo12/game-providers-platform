@@ -1,17 +1,7 @@
 import { useState } from 'react'
 import { ProviderCard } from './ProviderCard'
-import { Pagination, EmptyState } from '../shared'
-import { useToast } from '../../hooks/useToast'
-
-function DownloadIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  )
-}
+import { Pagination, EmptyState, ExportButton, downloadCSV, arrayToCSV } from '../shared'
+import { api } from '../../api/client'
 
 function LoadingSkeleton() {
   return (
@@ -45,22 +35,33 @@ export function ProviderGrid({
   onClearFilters,
 }) {
   const [expandedId, setExpandedId] = useState(null)
-  const { showSuccess } = useToast()
 
-  const handleExport = () => {
-    // Build query params from filters
+  const handleExport = async () => {
+    // Fetch all providers (not just current page) with active filters
     const params = new URLSearchParams()
     if (filters?.search) params.set('search', filters.search)
     if (filters?.currency_mode) params.set('currency_mode', filters.currency_mode)
-    filters?.game_type?.forEach(v => params.append('game_type', v))
-    filters?.supported_currency?.forEach(v => params.append('supported_currency', v))
-    filters?.restricted_country?.forEach(v => params.append('restricted_country', v))
-    filters?.regulated_country?.forEach(v => params.append('regulated_country', v))
+    if (filters?.game_type?.length) params.set('game_type', filters.game_type.join(','))
+    if (filters?.fiat_currency?.length) params.set('fiat_currency', filters.fiat_currency.join(','))
+    if (filters?.crypto_currency?.length) params.set('crypto_currency', filters.crypto_currency.join(','))
+    if (filters?.restricted_country?.length) params.set('restricted_country', filters.restricted_country.join(','))
+    if (filters?.regulated_country?.length) params.set('regulated_country', filters.regulated_country.join(','))
+    params.set('page_size', '10000')
 
-    const queryString = params.toString()
-    const url = queryString ? `/api/providers/export/?${queryString}` : '/api/providers/export/'
-    window.open(url, '_blank')
-    showSuccess('CSV downloaded successfully')
+    const data = await api.get(`/providers/?${params.toString()}`)
+    const allProviders = data?.results ?? []
+
+    const headers = ['ID', 'Provider Name', 'Status', 'Currency Mode', 'Game Count', 'Game Types']
+    const rows = allProviders.map(p => ({
+      'ID': p.id,
+      'Provider Name': p.provider_name,
+      'Status': p.status,
+      'Currency Mode': p.currency_mode,
+      'Game Count': p.game_count ?? 0,
+      'Game Types': (p.supported_game_types ?? []).join(', '),
+    }))
+    const csv = arrayToCSV(headers, rows)
+    downloadCSV(csv, 'providers')
   }
 
   if (isLoading) {
@@ -89,14 +90,7 @@ export function ProviderGrid({
             <span className="text-sm text-text-muted">Updating...</span>
           )}
           {totalCount > 0 && (
-            <button
-              onClick={handleExport}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg
-                         bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-            >
-              <DownloadIcon />
-              Export to Excel
-            </button>
+            <ExportButton onClick={handleExport} label="Export to Excel" />
           )}
         </div>
       </div>
