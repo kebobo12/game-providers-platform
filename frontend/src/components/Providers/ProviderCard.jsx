@@ -231,6 +231,7 @@ export function ExpandedPanel({ provider, isExpanded }) {
               <ProviderTabs
                 provider={providerDetail || provider}
                 isLoading={isLoading}
+                isExpanded={isExpanded}
               />
             </div>
           </div>

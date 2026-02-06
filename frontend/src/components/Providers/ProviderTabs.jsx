@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CurrenciesTab, CountriesTab, GamesTab } from './tabs'
 
 function CurrencyIcon() {
@@ -45,10 +45,18 @@ const TABS = [
   { id: 'assets', label: 'Assets', icon: FolderIcon },
 ]
 
-export function ProviderTabs({ provider, isLoading }) {
+export function ProviderTabs({ provider, isLoading, isExpanded }) {
   const [activeTab, setActiveTab] = useState('currencies')
   // Track if games tab has been visited (for lazy loading)
   const [gamesTabVisited, setGamesTabVisited] = useState(false)
+
+  // Reset to default tab when card collapses
+  useEffect(() => {
+    if (!isExpanded) {
+      setActiveTab('currencies')
+      setGamesTabVisited(false)
+    }
+  }, [isExpanded])
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId)
