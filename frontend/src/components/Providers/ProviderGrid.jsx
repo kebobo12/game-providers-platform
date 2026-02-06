@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { ProviderCard, ExpandedPanel } from './ProviderCard'
 import { Pagination, EmptyState, ExportButton, downloadCSV, arrayToCSV } from '../shared'
 import { api } from '../../api/client'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 
 const COLS = 2
 
@@ -37,8 +38,9 @@ export function ProviderGrid({
   onClearFilters,
 }) {
   const [expandedId, setExpandedId] = useState(null)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
-  // Chunk providers into rows of COLS for rendering expansion panels after each row
+  // Chunk providers into rows of COLS for desktop rendering
   const rows = useMemo(() => {
     const result = []
     for (let i = 0; i < providers.length; i += COLS) {
@@ -113,32 +115,47 @@ export function ProviderGrid({
           actionLabel={onClearFilters ? 'Clear filters' : undefined}
           onAction={onClearFilters}
         />
-      ) : (
+      ) : isDesktop ? (
+        // Desktop: row chunking with panel spanning full width below each row
         <div className="space-y-4">
-          {rows.map((row, rowIdx) => {
-            return (
-              <div key={rowIdx}>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {row.map(provider => (
-                    <ProviderCard
-                      key={provider.id}
-                      provider={provider}
-                      isExpanded={expandedId === provider.id}
-                      onToggle={() => setExpandedId(prev => prev === provider.id ? null : provider.id)}
-                    />
-                  ))}
-                </div>
-                {/* Expanded panel below the row — one per provider to preserve animation on close */}
+          {rows.map((row, rowIdx) => (
+            <div key={rowIdx}>
+              <div className="grid grid-cols-2 gap-4">
                 {row.map(provider => (
-                  <ExpandedPanel
+                  <ProviderCard
                     key={provider.id}
                     provider={provider}
                     isExpanded={expandedId === provider.id}
+                    onToggle={() => setExpandedId(prev => prev === provider.id ? null : provider.id)}
                   />
                 ))}
               </div>
-            )
-          })}
+              {row.map(provider => (
+                <ExpandedPanel
+                  key={provider.id}
+                  provider={provider}
+                  isExpanded={expandedId === provider.id}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Mobile: flat list with panel directly after each card
+        <div className="space-y-4">
+          {providers.map(provider => (
+            <div key={provider.id}>
+              <ProviderCard
+                provider={provider}
+                isExpanded={expandedId === provider.id}
+                onToggle={() => setExpandedId(prev => prev === provider.id ? null : provider.id)}
+              />
+              <ExpandedPanel
+                provider={provider}
+                isExpanded={expandedId === provider.id}
+              />
+            </div>
+          ))}
         </div>
       )}
 
